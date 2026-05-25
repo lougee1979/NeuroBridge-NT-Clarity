@@ -57,6 +57,8 @@ struct KeyboardView: View {
     @State private var spiralGrammar = ""
     @State private var spiralOriginal = ""
     @State private var spiralOriginalCount = 0
+    @State private var isShifted = false
+    @State private var isNumbers = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -139,48 +141,128 @@ struct KeyboardView: View {
                     .foregroundStyle(.secondary)
             }
 
-            // Action row
-            HStack(spacing: 8) {
-                Button(action: rewrite) {
-                    HStack(spacing: 6) {
-                        if isRewriting {
-                            ProgressView().scaleEffect(0.7).tint(.white)
-                        } else {
-                            Image(systemName: "sparkles").font(.system(size: 13))
-                        }
-                        Text(isRewriting ? "Working" : "Rewrite")
-                            .font(.system(size: 13, weight: .bold))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.85)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 13)
-                    .background(isRewriting ? Color.brandTeal.opacity(0.55) : Color.brandTeal)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                }
-                .disabled(isRewriting)
+            rewriteActionRow
+                .padding(.horizontal, 6)
 
-                Button { inputVC.textDocumentProxy.insertText("\n") } label: {
-                    Image(systemName: "return")
-                        .font(.system(size: 15))
-                        .frame(width: 46, height: 46)
-                        .background(Color(.systemGray4))
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                }
-
-                Button { inputVC.textDocumentProxy.deleteBackward() } label: {
-                    Image(systemName: "delete.left")
-                        .font(.system(size: 15))
-                        .frame(width: 46, height: 46)
-                        .background(Color(.systemGray4))
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                }
-            }
-            .padding(.horizontal, 14)
-            .padding(.bottom, 10)
+            qwertyKeyboard
+                .padding(.horizontal, 6)
+                .padding(.bottom, 4)
         }
         .padding(.top, 10)
+    }
+
+
+    private var rewriteActionRow: some View {
+        HStack(spacing: 4) {
+            rewriteChip("Rewrite", systemImage: "sparkles") { rewrite() }
+            rewriteChip("Shorter", systemImage: nil) { insertInstruction("Make this shorter and clearer.") }
+            rewriteChip("Warmer", systemImage: nil) { insertInstruction("Make this warmer while keeping my meaning.") }
+            rewriteChip("Direct", systemImage: nil) { insertInstruction("Make this more direct and clear.") }
+        }
+    }
+
+    private var qwertyKeyboard: some View {
+        VStack(spacing: 5) {
+            if isNumbers {
+                keyRow(["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"])
+                keyRow(["-", "/", ":", ";", "(", ")", "$", "&", "@", "\""])
+                HStack(spacing: 5) {
+                    specialKey("ABC", width: 52) { isNumbers = false }
+                    keyRow([".", ",", "?", "!", "'"], flexible: true)
+                    specialKey("⌫", width: 52) { inputVC.textDocumentProxy.deleteBackward() }
+                }
+            } else {
+                keyRow(["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"])
+                keyRow(["a", "s", "d", "f", "g", "h", "j", "k", "l"]).padding(.horizontal, 18)
+                HStack(spacing: 5) {
+                    specialKey(isShifted ? "⇧" : "⇧", width: 42, highlighted: isShifted) { isShifted.toggle() }
+                    keyRow(["z", "x", "c", "v", "b", "n", "m"], flexible: true)
+                    specialKey("⌫", width: 42) { inputVC.textDocumentProxy.deleteBackward() }
+                }
+            }
+
+            HStack(spacing: 5) {
+                specialKey(isNumbers ? "ABC" : "123", width: 48) { isNumbers.toggle() }
+                specialKey("🌐", width: 42) { inputVC.advanceToNextInputMode() }
+                Button { inputVC.textDocumentProxy.insertText(" ") } label: {
+                    Text("space")
+                        .font(.system(size: 16))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 38)
+                        .background(Color.white)
+                        .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
+                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                specialKey("return", width: 70) { inputVC.textDocumentProxy.insertText("\n") }
+            }
+        }
+    }
+
+    private func keyRow(_ keys: [String], flexible: Bool = false) -> some View {
+        HStack(spacing: 5) {
+            ForEach(keys, id: \.self) { key in
+                letterKey(key)
+                    .if(flexible) { $0.frame(maxWidth: .infinity) }
+            }
+        }
+    }
+
+    private func letterKey(_ key: String) -> some View {
+        Button {
+            let output = isShifted ? key.uppercased() : key
+            inputVC.textDocumentProxy.insertText(output)
+            if isShifted { isShifted = false }
+        } label: {
+            Text(isShifted ? key.uppercased() : key)
+                .font(.system(size: 21))
+                .frame(maxWidth: .infinity)
+                .frame(height: 38)
+                .background(Color.white)
+                .foregroundStyle(Color(red: 0.08, green: 0.10, blue: 0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .shadow(color: Color.black.opacity(0.18), radius: 0, x: 0, y: 1)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func specialKey(_ title: String, width: CGFloat, highlighted: Bool = false, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 15, weight: .medium))
+                .frame(width: width, height: 38)
+                .background(highlighted ? Color.white : Color(.systemGray4))
+                .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
+                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func rewriteChip(_ title: String, systemImage: String?, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 4) {
+                if isRewriting && title == "Rewrite" {
+                    ProgressView().scaleEffect(0.6).tint(.white)
+                } else if let systemImage {
+                    Image(systemName: systemImage).font(.system(size: 11))
+                }
+                Text(isRewriting && title == "Rewrite" ? "Working" : title)
+                    .font(.system(size: 13, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(isRewriting && title == "Rewrite" ? Color.brandTeal.opacity(0.55) : Color.white)
+            .foregroundStyle(Color(red: 0.10, green: 0.12, blue: 0.16))
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .disabled(isRewriting && title == "Rewrite")
+    }
+
+    private func insertInstruction(_ text: String) {
+        inputVC.textDocumentProxy.insertText(text)
     }
 
     // MARK: - Spiral card
@@ -700,5 +782,13 @@ final class LogStore {
             .sorted { $0.value > $1.value }
             .prefix(3)
             .map { (pattern: $0.key, count: $0.value) }
+    }
+}
+
+
+private extension View {
+    @ViewBuilder
+    func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
+        if condition { transform(self) } else { self }
     }
 }
