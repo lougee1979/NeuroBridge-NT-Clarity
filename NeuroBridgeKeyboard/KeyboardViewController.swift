@@ -59,20 +59,13 @@ struct KeyboardView: View {
     @State private var spiralOriginalCount = 0
     @State private var isShifted = false
     @State private var isNumbers = false
+    @State private var lastRewriteStyle = "Rewrite"
 
     var body: some View {
         VStack(spacing: 0) {
             topBar
             Divider()
-            if showSpiral {
-                spiralCard
-                    .transition(.move(edge: .top).combined(with: .opacity))
-            } else if !explanation.isEmpty && showExpl {
-                explanationCard
-                    .transition(.move(edge: .top).combined(with: .opacity))
-            } else {
-                mainPanel
-            }
+            mainPanel
         }
         .background(Color(.systemGroupedBackground))
         .preferredColorScheme(.light)
@@ -141,6 +134,9 @@ struct KeyboardView: View {
                     .foregroundStyle(.secondary)
             }
 
+            rewriteWindow
+                .padding(.horizontal, 8)
+
             rewriteActionRow
                 .padding(.horizontal, 6)
 
@@ -154,10 +150,10 @@ struct KeyboardView: View {
 
     private var rewriteActionRow: some View {
         HStack(spacing: 4) {
-            rewriteChip("Rewrite", systemImage: "sparkles") { rewrite() }
-            rewriteChip("Shorter", systemImage: nil) { insertInstruction("Make this shorter and clearer.") }
-            rewriteChip("Warmer", systemImage: nil) { insertInstruction("Make this warmer while keeping my meaning.") }
-            rewriteChip("Direct", systemImage: nil) { insertInstruction("Make this more direct and clear.") }
+            rewriteChip("Rewrite", systemImage: "sparkles") { rewrite(style: "Rewrite") }
+            rewriteChip("Shorter", systemImage: nil) { rewrite(style: "Shorter") }
+            rewriteChip("Warmer", systemImage: nil) { rewrite(style: "Warmer") }
+            rewriteChip("Direct", systemImage: nil) { rewrite(style: "Direct") }
         }
     }
 
@@ -261,8 +257,45 @@ struct KeyboardView: View {
         .disabled(isRewriting && title == "Rewrite")
     }
 
-    private func insertInstruction(_ text: String) {
-        inputVC.textDocumentProxy.insertText(text)
+    private var rewriteWindow: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 6) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(Color.brandTeal)
+                Text("Rewrite window")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
+                Spacer()
+                Text(lastRewriteStyle)
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+
+            if showSpiral {
+                Text("Pause check: this may land differently than intended. Choose As-is, Grammar, or NT.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            } else if !explanation.isEmpty && showExpl {
+                Text(explanation)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            } else {
+                Text("Type in any app, then tap Rewrite, Shorter, Warmer, or Direct. The rewritten text is inserted into the message field.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.82))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(Color.brandTeal.opacity(0.25), lineWidth: 1)
+        )
     }
 
     // MARK: - Spiral card
@@ -365,7 +398,7 @@ struct KeyboardView: View {
 
     // MARK: - Rewrite
 
-    private func rewrite() {
+    private func rewrite(style: String = "Rewrite") {
         let proxy = inputVC.textDocumentProxy
 
         // documentContextBeforeInput is capped by iOS to ~100–200 chars.
@@ -381,6 +414,7 @@ struct KeyboardView: View {
 
         guard !full.isEmpty else { showStatus("Type some text first"); return }
 
+        lastRewriteStyle = style
         showStatus("Sending \(full.count) chars…")
         isRewriting = true
         explanation = ""
@@ -390,7 +424,7 @@ struct KeyboardView: View {
 
         Task {
             do {
-                let result = try await callClaude(text: full)
+                let result = try await callClaude(text: full, style: style)
 
                 // Move to the end first. deleteBackward() only removes text before the cursor,
                 // so replacing a pasted brain dump from the middle can otherwise leave one half
@@ -519,12 +553,12 @@ struct KeyboardView: View {
         var isSpiraling: Bool { !distortions.isEmpty }
     }
 
-    private func callClaude(text: String) async throws -> ClaudeResult {
+    private func callClaude(text: String, style: String = "Rewrite") async throws -> ClaudeResult {
         guard let apiKey = defaults?.string(forKey: "claudeAPIKey"), !apiKey.isEmpty else {
             throw NBError.noKey
         }
 
-        let system = buildSystem()
+        let system = buildSystem(style: style)
         let prompt = "Text:\n\(text)\n\nReply with ONLY valid JSON."
 
         var req = URLRequest(url: URL(string: "https://api.anthropic.com/v1/messages")!)
@@ -606,11 +640,18 @@ struct KeyboardView: View {
         return s
     }
 
-    private func buildSystem() -> String {
+    private func buildSystem(style: String = "Rewrite") -> String {
         let instruction = levelInstruction(level: level, profile: profile)
         let adaptive    = adaptiveContext()
+        let styleInstruction: String
+        switch style {
+        case "Shorter": styleInstruction = "Make the rewrite shorter. Remove repetition and extra context while preserving the actual point."
+        case "Warmer": styleInstruction = "Make the rewrite warmer and more socially soft, without becoming fake or over-apologetic."
+        case "Direct": styleInstruction = "Make the rewrite more direct, clear, and action-oriented without sounding harsh."
+        default: styleInstruction = "Make a balanced clear rewrite."
+        }
         return """
-        You are a communication assistant that translates ND communication into NT-readable communication for a \(profile) user. \(instruction)\(adaptive)
+        You are a communication assistant that translates ND communication into NT-readable communication for a \(profile) user. \(instruction) \(styleInstruction)\(adaptive)
 
         Rewrite the entire text the user provided from ND style into NT style. Do not stop halfway, do not summarize only the beginning, and do not omit later points just because the text is long or messy. Preserve the user's intended message, requests, constraints, and necessary context from the whole original, but translate the structure, order, tone, and phrasing into what an NT reader would naturally expect.
 
