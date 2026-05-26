@@ -11,12 +11,20 @@ import SwiftUI
 import UIKit
 
 extension Color {
-    static let brandVioletDark = Color(red: 0.04, green: 0.06, blue: 0.22)
-    static let brandViolet = Color(red: 0.02, green: 0.23, blue: 0.98)
-    static let brandGreen = Color(red: 0.06, green: 0.72, blue: 0.70)
-    static let brandWhite = Color(red: 0.97, green: 0.98, blue: 0.98)
-    static let brandVioletMist = Color(red: 0.93, green: 0.91, blue: 1.0)
-    static let brandGreenMist = Color(red: 0.93, green: 0.98, blue: 0.98)
+    static let toneLayerBlue = Color(red: 0.145, green: 0.388, blue: 0.922)
+    static let toneLayerBlueSoft = Color(red: 0.859, green: 0.918, blue: 0.996)
+    static let clarityGreen = Color(red: 0.020, green: 0.588, blue: 0.412)
+    static let clarityGreenSoft = Color(red: 0.820, green: 0.980, blue: 0.898)
+    static let appNeutral = Color(red: 0.322, green: 0.322, blue: 0.357)
+    static let appSurface = Color(red: 0.925, green: 0.992, blue: 0.957)
+    static let cardSurface = Color.white
+
+    static let brandVioletDark = clarityGreen
+    static let brandViolet = toneLayerBlue
+    static let brandGreen = clarityGreen
+    static let brandWhite = cardSurface
+    static let brandVioletMist = clarityGreenSoft
+    static let brandGreenMist = clarityGreenSoft
 }
 
 struct GlassCard: ViewModifier {
@@ -27,28 +35,13 @@ struct GlassCard: ViewModifier {
         content
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(.ultraThinMaterial)
-                    .overlay(
-                        LinearGradient(
-                            colors: [Color.brandWhite.opacity(0.42), tint.opacity(0.18), Color.brandViolet.opacity(0.16), Color.brandGreen.opacity(0.10)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-                    )
+                    .fill(Color.cardSurface)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(
-                        LinearGradient(
-                            colors: [Color.brandWhite.opacity(0.78), tint.opacity(0.44), Color.brandViolet.opacity(0.36), Color.brandGreen.opacity(0.26)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
+                    .stroke(tint.opacity(0.22), lineWidth: 1)
             )
-            .shadow(color: tint.opacity(0.10), radius: 18, x: 0, y: 10)
+            .shadow(color: tint.opacity(0.08), radius: 10, x: 0, y: 5)
     }
 }
 
@@ -81,6 +74,8 @@ struct ContentView: View {
     private let apiKeyKey = "ntClarityClaudeAPIKey"
     private let showTeachingKey = "ntClarityShowTeaching"
     private let aiConsentKey = "toneLayerAIProcessingConsent"
+    private let appGroupID = "group.com.alden.ndclarity"
+    private var sharedDefaults: UserDefaults? { UserDefaults(suiteName: appGroupID) }
     private let lenses = ["General ND", "ADHD", "Autism", "PTSD / CPTSD", "Mixed"]
     private let goals = ["Make clearer", "Reduce anxiety", "Make actionable"]
     private let resultTabs = ["Fix", "Tone", "Why", "Tip"]
@@ -125,10 +120,13 @@ struct ContentView: View {
             }
             .padding()
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.appSurface)
         .preferredColorScheme(.light)
         .onAppear {
-            apiKey = UserDefaults.standard.string(forKey: apiKeyKey) ?? ""
+            apiKey = sharedDefaults?.string(forKey: "claudeAPIKey")
+                ?? UserDefaults.standard.string(forKey: apiKeyKey)
+                ?? ""
+            if !apiKey.isEmpty { syncKeyboardSettings() }
             if UserDefaults.standard.object(forKey: showTeachingKey) == nil {
                 showTeaching = true
                 UserDefaults.standard.set(true, forKey: showTeachingKey)
@@ -136,6 +134,7 @@ struct ContentView: View {
                 showTeaching = UserDefaults.standard.bool(forKey: showTeachingKey)
             }
             aiConsent = UserDefaults.standard.bool(forKey: aiConsentKey)
+            syncKeyboardSettings()
         }
         .sheet(isPresented: $showingExportSheet) {
             if !activityItems.isEmpty {
@@ -154,17 +153,43 @@ struct ContentView: View {
                 .frame(width: 88, height: 88)
                 .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
 
-            Text("ToneLayer Clarity")
+            Text("ToneLayer")
                 .font(.system(size: 32, weight: .bold))
-                .foregroundStyle(Color.brandVioletDark)
+                .foregroundStyle(Color.clarityGreen)
 
-            Text("Fine-tune messages for clarity before they are sent.")
+            Text("Clarity")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(Color.clarityGreen)
+
+            Text("Rewrite NT speech so it lands more clearly for neurodivergent readers.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
+
+            HStack(spacing: 10) {
+                statusPill(label: "Mode", value: "Clarity")
+                statusPill(label: "Direction", value: "NT -> ND")
+                statusPill(label: "Live AI", value: aiConsent && !apiKey.isEmpty ? "On" : "Local")
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(24)
-        .glassCard(tint: .brandVioletDark)
+        .glassCard(tint: .clarityGreen, cornerRadius: 18)
+    }
+
+    private func statusPill(label: String, value: String) -> some View {
+        HStack {
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text(value)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(Color.clarityGreen)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(Color.clarityGreenSoft)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     private var dailyTipCard: some View {
@@ -184,7 +209,7 @@ struct ContentView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .glassCard(tint: .brandGreen, cornerRadius: 18)
+        .glassCard(tint: .clarityGreen, cornerRadius: 18)
     }
 
     private var todayTip: (title: String, body: String) {
@@ -260,7 +285,7 @@ struct ContentView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 13)
-                .background(isRewriting || draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.brandVioletDark.opacity(0.45) : Color.brandVioletDark)
+                .background(isRewriting || draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.clarityGreen.opacity(0.45) : Color.clarityGreen)
                 .foregroundStyle(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
@@ -284,14 +309,14 @@ struct ContentView: View {
                         .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
                 .frame(maxWidth: .infinity, minHeight: 120, alignment: .topLeading)
                 .padding(14)
-                        .background(Color.brandVioletMist.opacity(0.95))
+                        .background(Color.clarityGreenSoft.opacity(0.95))
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .textSelection(.enabled)
 
             VStack(alignment: .leading, spacing: 8) {
                 Label("Why", systemImage: "lightbulb")
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.brandVioletDark)
+                    .foregroundStyle(Color.clarityGreen)
                 Text(teachingWindowText)
                     .font(.subheadline)
                         .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
@@ -309,7 +334,7 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(Color.brandVioletDark)
+                    .tint(Color.clarityGreen)
 
                     Button { replaceDraftWithResult() } label: {
                         Label("Replace Draft", systemImage: "arrow.uturn.down")
@@ -371,12 +396,12 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .tint(Color.brandGreen)
+            .tint(Color.clarityGreen)
             .disabled(!hasOutput)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
-        .glassCard(tint: .brandVioletDark)
+        .glassCard(tint: .clarityGreen, cornerRadius: 18)
     }
 
     private var optionsCard: some View {
@@ -389,6 +414,9 @@ struct ContentView: View {
                         ForEach(lenses, id: \.self) { Text($0).tag($0) }
                     }
                     .pickerStyle(.segmented)
+                    .onChange(of: audienceLens) { _, _ in
+                        syncKeyboardSettings()
+                    }
                     Text("Default to General ND unless you know which lens is appropriate.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -407,6 +435,7 @@ struct ContentView: View {
                         .labelsHidden()
                         .onChange(of: showTeaching) { _, newValue in
                             UserDefaults.standard.set(newValue, forKey: showTeachingKey)
+                            syncKeyboardSettings()
                             if !newValue { selectedResult = "Fix" }
                         }
                 }
@@ -436,6 +465,7 @@ struct ContentView: View {
                         .textInputAutocapitalization(.never)
                     Button("Save Key") {
                         UserDefaults.standard.set(apiKey, forKey: apiKeyKey)
+                        syncKeyboardSettings()
                         status = "API key saved"
                     }
                     .font(.subheadline.weight(.semibold))
@@ -448,11 +478,11 @@ struct ContentView: View {
                     .font(.title3.weight(.semibold))
                 Spacer()
                 Image(systemName: "chevron.down.circle.fill")
-                    .foregroundStyle(Color.brandGreen)
+                    .foregroundStyle(Color.clarityGreen)
             }
         }
         .padding(20)
-        .glassCard(tint: .brandGreen)
+        .glassCard(tint: .appNeutral, cornerRadius: 18)
     }
 
 
@@ -537,6 +567,23 @@ struct ContentView: View {
         let fullKey = "metrics.\(key)"
         UserDefaults.standard.set(UserDefaults.standard.integer(forKey: fullKey) + amount, forKey: fullKey)
         UserDefaults.standard.set(Date(), forKey: "metrics.lastUpdated")
+    }
+
+    private func syncKeyboardSettings() {
+        sharedDefaults?.set(apiKey, forKey: "claudeAPIKey")
+        sharedDefaults?.set(showTeaching, forKey: "showExplanation")
+        sharedDefaults?.set("Clarity", forKey: "keyboardMode")
+        sharedDefaults?.set(normalizedKeyboardProfile(audienceLens), forKey: "selectedProfile")
+        sharedDefaults?.synchronize()
+    }
+
+    private func normalizedKeyboardProfile(_ lens: String) -> String {
+        switch lens {
+        case "General ND", "Mixed":
+            return "Mixed / Not Sure"
+        default:
+            return lens
+        }
     }
 
     private func recordSatisfaction(helpful: Bool) {
@@ -683,6 +730,7 @@ struct ContentView: View {
         """
         You are ToneLayer Clarity, a communication assistant for neurotypical senders who want their message to be easier for neurodivergent people to understand.
 
+        Direction: NT-to-ND.
         Audience lens: \(audienceLens)
         Goal: \(goal)
 
