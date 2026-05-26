@@ -250,7 +250,7 @@ struct ContentView: View {
                     } else {
                         Image(systemName: "wand.and.stars")
                     }
-                    Text(isRewriting ? "Tuning…" : "Fix Message")
+                    Text(isRewriting ? "Tuning…" : "Clarify")
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
