@@ -125,7 +125,7 @@ struct KeyboardView: View {
                             .font(.system(size: 14, weight: level == l ? .bold : .semibold))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 8)
-                            .background(level == l ? Color.appleKeyboardText : Color.appleKeyboardSpecialKey.opacity(0.78))
+                            .background(level == l ? Color.brandTeal : Color.appleKeyboardSpecialKey.opacity(0.78))
                             .foregroundStyle(level == l ? Color.white : Color.appleKeyboardText)
                             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     }
@@ -257,8 +257,8 @@ struct KeyboardView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
-            .background(isRewriting ? Color.appleKeyboardSpecialKey : Color.appleKeyboardKey)
-            .foregroundStyle(Color.appleKeyboardText)
+            .background(isRewriting ? Color.brandTeal.opacity(0.55) : Color.appleKeyboardKey)
+            .foregroundStyle(title == "Clarify" ? Color.brandTeal : Color.appleKeyboardText)
             .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
             .shadow(color: Color.black.opacity(0.16), radius: 0, x: 0, y: 1)
         }
