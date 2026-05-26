@@ -1,4 +1,4 @@
-# NeuroBridge NT Clarity
+# ToneLayer Clarity
 
 Proprietary software. Copyright (c) 2026 Alden Lougee. All rights reserved.
 

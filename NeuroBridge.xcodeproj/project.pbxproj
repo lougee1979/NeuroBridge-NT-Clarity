@@ -503,7 +503,7 @@
 				DEVELOPMENT_TEAM = 466RHQ4TLW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "ND Clarity";
+				INFOPLIST_KEY_CFBundleDisplayName = "ToneLayer Clarity";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -538,7 +538,7 @@
 				DEVELOPMENT_TEAM = 466RHQ4TLW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "ND Clarity";
+				INFOPLIST_KEY_CFBundleDisplayName = "ToneLayer Clarity";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -655,7 +655,7 @@
 				DEVELOPMENT_TEAM = 466RHQ4TLW;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NeuroBridgeKeyboard/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "ND Clarity Keyboard";
+				INFOPLIST_KEY_CFBundleDisplayName = "ToneLayer Keyboard";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -684,7 +684,7 @@
 				DEVELOPMENT_TEAM = 466RHQ4TLW;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NeuroBridgeKeyboard/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "ND Clarity Keyboard";
+				INFOPLIST_KEY_CFBundleDisplayName = "ToneLayer Keyboard";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

@@ -73,12 +73,14 @@ struct ContentView: View {
     @State private var selectedResult = "Fix"
     @State private var showingOptions = false
     @State private var showTeaching = true
+    @State private var aiConsent = false
     @State private var exportURL: URL?
     @State private var activityItems: [Any] = []
     @State private var showingExportSheet = false
 
     private let apiKeyKey = "ntClarityClaudeAPIKey"
     private let showTeachingKey = "ntClarityShowTeaching"
+    private let aiConsentKey = "toneLayerAIProcessingConsent"
     private let lenses = ["General ND", "ADHD", "Autism", "PTSD / CPTSD"]
     private let goals = ["Make clearer", "Reduce anxiety", "Make actionable"]
     private let resultTabs = ["Fix", "Tone", "Why", "Tip"]
@@ -133,6 +135,7 @@ struct ContentView: View {
             } else {
                 showTeaching = UserDefaults.standard.bool(forKey: showTeachingKey)
             }
+            aiConsent = UserDefaults.standard.bool(forKey: aiConsentKey)
         }
         .sheet(isPresented: $showingExportSheet) {
             if !activityItems.isEmpty {
@@ -151,11 +154,11 @@ struct ContentView: View {
                 .frame(width: 88, height: 88)
                 .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
 
-            Text("ND Clarity")
+            Text("ToneLayer Clarity")
                 .font(.system(size: 32, weight: .bold))
                 .foregroundStyle(Color.brandVioletDark)
 
-            Text("Translate unclear neurotypical messaging into communication that is easier for neurodivergent people to understand.")
+            Text("Fine-tune messages for clarity before they are sent.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
         }
@@ -227,6 +230,8 @@ struct ContentView: View {
                         .allowsHitTesting(false)
                 }
             }
+
+            messageLengthNotice
 
             HStack(spacing: 10) {
                 Button { pasteFromClipboard() } label: {
@@ -392,6 +397,22 @@ struct ContentView: View {
                         }
                 }
 
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Label("AI processing consent", systemImage: "lock.shield")
+                            .font(.headline)
+                        Text("ToneLayer sends only the message text you choose to clarify to the AI provider for rewriting. Do not include passwords, secrets, or medical record numbers in test messages.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Toggle("", isOn: $aiConsent)
+                        .labelsHidden()
+                        .onChange(of: aiConsent) { _, newValue in
+                            UserDefaults.standard.set(newValue, forKey: aiConsentKey)
+                        }
+                }
+
                 VStack(alignment: .leading, spacing: 10) {
                     Label("API Key", systemImage: "key.fill")
                         .font(.headline)
@@ -418,6 +439,29 @@ struct ContentView: View {
         }
         .padding(20)
         .glassCard(tint: .brandGreen)
+    }
+
+
+    private var messageLengthNotice: some View {
+        let words = draft.trimmingCharacters(in: .whitespacesAndNewlines)
+            .split { $0.isWhitespace || $0.isNewline }
+            .count
+        let chars = draft.count
+        let isLong = chars >= 700 || words >= 120
+        return VStack(alignment: .leading, spacing: 6) {
+            Text("\(chars) chars • \(words) words")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            if isLong {
+                Text("This is getting long for a text. Are you okay? If this is turning into a novel, try Clarify or Make Brief before sending.")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color(red: 0.42, green: 0.24, blue: 0.02))
+                    .padding(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.yellow.opacity(0.18))
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
+        }
     }
 
     private var hasOutput: Bool {
@@ -505,6 +549,10 @@ struct ContentView: View {
     private func rewriteMessage() {
         let input = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !input.isEmpty else { return }
+        guard aiConsent else {
+            status = "Turn on AI processing consent in Options first"
+            return
+        }
         guard !apiKey.isEmpty else {
             status = "Add your Claude API key in Options first"
             return
@@ -598,7 +646,7 @@ struct ContentView: View {
 
     private func buildSystemPrompt() -> String {
         """
-        You are ND Clarity, a communication assistant for neurotypical senders who want their message to be easier for neurodivergent people to understand.
+        You are ToneLayer Clarity, a communication assistant for neurotypical senders who want their message to be easier for neurodivergent people to understand.
 
         Audience lens: \(audienceLens)
         Goal: \(goal)

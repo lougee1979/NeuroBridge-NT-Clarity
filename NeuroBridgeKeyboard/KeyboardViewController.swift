@@ -60,6 +60,7 @@ struct KeyboardView: View {
     @State private var isShifted = false
     @State private var isNumbers = false
     @State private var lastRewriteStyle = "Rewrite"
+    @State private var keyboardTypedText = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -80,7 +81,7 @@ struct KeyboardView: View {
                 .foregroundStyle(Color.brandTeal)
                 .font(.system(size: 15))
             VStack(alignment: .leading, spacing: 1) {
-                Text("NeuroBridge")
+                Text("ToneLayer")
                     .font(.system(size: 11, weight: .bold))
                 Text(profile)
                     .font(.system(size: 10))
@@ -165,7 +166,7 @@ struct KeyboardView: View {
                 HStack(spacing: 5) {
                     specialKey("ABC", width: 52) { isNumbers = false }
                     keyRow([".", ",", "?", "!", "'"], flexible: true)
-                    specialKey("⌫", width: 52) { inputVC.textDocumentProxy.deleteBackward() }
+                    specialKey("⌫", width: 52) { inputVC.textDocumentProxy.deleteBackward(); if !keyboardTypedText.isEmpty { keyboardTypedText.removeLast() } }
                 }
             } else {
                 keyRow(["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"])
@@ -173,14 +174,14 @@ struct KeyboardView: View {
                 HStack(spacing: 5) {
                     specialKey(isShifted ? "⇧" : "⇧", width: 42, highlighted: isShifted) { isShifted.toggle() }
                     keyRow(["z", "x", "c", "v", "b", "n", "m"], flexible: true)
-                    specialKey("⌫", width: 42) { inputVC.textDocumentProxy.deleteBackward() }
+                    specialKey("⌫", width: 42) { inputVC.textDocumentProxy.deleteBackward(); if !keyboardTypedText.isEmpty { keyboardTypedText.removeLast() } }
                 }
             }
 
             HStack(spacing: 5) {
                 specialKey(isNumbers ? "ABC" : "123", width: 48) { isNumbers.toggle() }
                 specialKey("🌐", width: 42) { inputVC.advanceToNextInputMode() }
-                Button { inputVC.textDocumentProxy.insertText(" ") } label: {
+                Button { inputVC.textDocumentProxy.insertText(" "); keyboardTypedText += " " } label: {
                     Text("space")
                         .font(.system(size: 16))
                         .frame(maxWidth: .infinity)
@@ -190,7 +191,7 @@ struct KeyboardView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                 }
                 .buttonStyle(.plain)
-                specialKey("return", width: 70) { inputVC.textDocumentProxy.insertText("\n") }
+                specialKey("return", width: 70) { inputVC.textDocumentProxy.insertText("\n"); keyboardTypedText += "\n" }
             }
         }
     }
@@ -208,6 +209,7 @@ struct KeyboardView: View {
         Button {
             let output = isShifted ? key.uppercased() : key
             inputVC.textDocumentProxy.insertText(output)
+            keyboardTypedText += output
             if isShifted { isShifted = false }
         } label: {
             Text(isShifted ? key.uppercased() : key)
@@ -405,12 +407,12 @@ struct KeyboardView: View {
         // Prefer the full text written by the test box (UIKitTextView) to shared UserDefaults.
         // For other apps, fall back to the proxy (limited to what the host exposes).
         defaults?.synchronize()
-        let sharedText = defaults?.string(forKey: "testBoxFullText") ?? ""
         let before = proxy.documentContextBeforeInput ?? ""
         let after  = proxy.documentContextAfterInput  ?? ""
         let proxyText = (before + after).trimmingCharacters(in: .whitespacesAndNewlines)
-        let full = sharedText.isEmpty ? proxyText : sharedText.trimmingCharacters(in: .whitespacesAndNewlines)
-        let totalToDelete = sharedText.isEmpty ? (before.count + after.count) : sharedText.count
+        let typedText = keyboardTypedText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let full = typedText.isEmpty ? proxyText : typedText
+        let totalToDelete = typedText.isEmpty ? (before.count + after.count) : typedText.count
 
         guard !full.isEmpty else { showStatus("Type some text first"); return }
 
@@ -458,6 +460,7 @@ struct KeyboardView: View {
                     }
                 } else {
                     await MainActor.run {
+                        keyboardTypedText = result.rewrite
                         defaults?.set(result.rewrite, forKey: "testBoxFullText")
                         defaults?.set(false, forKey: "keyboardRewriteInProgress")
                         defaults?.synchronize()
@@ -527,6 +530,7 @@ struct KeyboardView: View {
             await deleteBackwardChunked(proxy: proxy, count: deleteCount)
             await insertTextChunked(proxy: proxy, text: text)
             await MainActor.run {
+                keyboardTypedText = text
                 defaults?.set(text, forKey: "testBoxFullText")
                 defaults?.set(false, forKey: "keyboardRewriteInProgress")
                 defaults?.synchronize()
@@ -765,7 +769,7 @@ enum NBError: LocalizedError {
     case badResponse
     var errorDescription: String? {
         switch self {
-        case .noKey:                return "No API key — add it in the NeuroBridge app"
+        case .noKey:                return "No API key — add it in the ToneLayer app"
         case .apiFailed(let code):  return "API failed (HTTP \(code))"
         case .apiMessage(let s):    return s
         case .badResponse:          return "Unexpected API response"
