@@ -70,7 +70,7 @@ struct ContentView: View {
     @State private var changeNotes = ""
     @State private var learningTakeaway = ""
     @State private var teachingExplanation = ""
-    @State private var selectedResult = "Clear"
+    @State private var selectedResult = "Fix"
     @State private var showingOptions = false
     @State private var showTeaching = true
     @State private var exportURL: URL?
@@ -81,7 +81,7 @@ struct ContentView: View {
     private let showTeachingKey = "ntClarityShowTeaching"
     private let lenses = ["General ND", "ADHD", "Autism", "PTSD / CPTSD"]
     private let goals = ["Make clearer", "Reduce anxiety", "Make actionable"]
-    private let resultTabs = ["Clear", "Heard", "Changed", "Learn"]
+    private let resultTabs = ["Fix", "Tone", "Why", "Tip"]
     private let dailyTips: [(title: String, body: String)] = [
         (
             "A blocked call may not feel neutral",
@@ -250,7 +250,7 @@ struct ContentView: View {
                     } else {
                         Image(systemName: "wand.and.stars")
                     }
-                    Text(isRewriting ? "Fine-tuning…" : "Clarify")
+                    Text(isRewriting ? "Tuning…" : "Fix Message")
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
@@ -269,7 +269,7 @@ struct ContentView: View {
 
             if showTeaching {
                 Picker("Result", selection: $selectedResult) {
-                    ForEach(resultTabs, id: \.self) { Text($0).tag($0) }
+                    ForEach(resultTabs, id: \.self) { Text($0).font(.caption).lineLimit(1).minimumScaleFactor(0.85).tag($0) }
                 }
                 .pickerStyle(.segmented)
             }
@@ -284,7 +284,7 @@ struct ContentView: View {
                 .textSelection(.enabled)
 
             VStack(alignment: .leading, spacing: 8) {
-                Label("Why it works", systemImage: "lightbulb")
+                Label("Why", systemImage: "lightbulb")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Color.brandVioletDark)
                 Text(teachingWindowText)
@@ -388,7 +388,7 @@ struct ContentView: View {
                         .labelsHidden()
                         .onChange(of: showTeaching) { _, newValue in
                             UserDefaults.standard.set(newValue, forKey: showTeachingKey)
-                            if !newValue { selectedResult = "Clear" }
+                            if !newValue { selectedResult = "Fix" }
                         }
                 }
 
@@ -426,9 +426,9 @@ struct ContentView: View {
 
     private var selectedResultText: String {
         switch selectedResult {
-        case "Heard": return interpretationRisk
-        case "Changed": return changeNotes
-        case "Learn": return learningTakeaway
+        case "Tone": return interpretationRisk
+        case "Why": return changeNotes
+        case "Tip": return learningTakeaway
         default: return clearerVersion
         }
     }
@@ -512,7 +512,7 @@ struct ContentView: View {
 
         isRewriting = true
         status = "Checking message..."
-        selectedResult = "Clear"
+        selectedResult = "Fix"
 
         Task {
             do {
