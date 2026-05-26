@@ -3,8 +3,8 @@
 // distribution, or derivative use is prohibited.
 
 //
-//  NeuroBridgeApp.swift
-//  NeuroBridge
+//  ToneLayerClarityApp.swift
+//  ToneLayer Clarity
 //
 //  Created by Alden-Edwin Lougee on 5/3/26.
 //
@@ -12,7 +12,7 @@
 import SwiftUI
 
 @main
-struct NeuroBridgeApp: App {
+struct ToneLayerClarityApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

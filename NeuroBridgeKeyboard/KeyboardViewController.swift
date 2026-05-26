@@ -5,7 +5,7 @@
 import UIKit
 import SwiftUI
 
-// MARK: - Brand color (#18C99A — teal from the NeuroBridge icon)
+// MARK: - Brand color (#18C99A — teal from the ToneLayer icon)
 
 extension Color {
     static let brandTeal = Color(red: 0.094, green: 0.788, blue: 0.604)
@@ -400,6 +400,12 @@ struct KeyboardView: View {
 
     // MARK: - Rewrite
 
+    private func incrementMetric(_ key: String, by amount: Int = 1) {
+        let fullKey = "metrics.\(key)"
+        defaults?.set((defaults?.integer(forKey: fullKey) ?? 0) + amount, forKey: fullKey)
+        defaults?.set(Date(), forKey: "metrics.lastUpdated")
+    }
+
     private func rewrite(style: String = "Clarify") {
         let proxy = inputVC.textDocumentProxy
 
@@ -417,6 +423,11 @@ struct KeyboardView: View {
         guard !full.isEmpty else { showStatus("Type some text first"); return }
 
         lastRewriteStyle = style
+        incrementMetric("keyboard.rewrite.requested")
+        incrementMetric("keyboard.rewrite.style.\(style)")
+        if full.count >= 700 || full.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count >= 120 {
+            incrementMetric("keyboard.longMessage.flagged")
+        }
         showStatus("Sending \(full.count) chars…")
         isRewriting = true
         explanation = ""
@@ -470,12 +481,14 @@ struct KeyboardView: View {
                                 : result.explanation
                             withAnimation { explanation = text }
                         }
+                        incrementMetric("keyboard.rewrite.success")
                         showStatus("Rewritten ✓")
                         saveLog(original: full, result: result)
                     }
                 }
             } catch {
                 await MainActor.run {
+                    incrementMetric("keyboard.rewrite.failed")
                     isRewriting = false
                     defaults?.set(false, forKey: "keyboardRewriteInProgress")
                     defaults?.synchronize()

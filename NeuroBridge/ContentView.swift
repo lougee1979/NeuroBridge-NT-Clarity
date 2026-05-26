@@ -4,7 +4,7 @@
 
 //
 //  ContentView.swift
-//  NeuroBridge NT Clarity
+//  ToneLayer Clarity
 //
 
 import SwiftUI
@@ -148,7 +148,7 @@ struct ContentView: View {
 
     private var headerCard: some View {
         VStack(spacing: 12) {
-            Image("NeuroBridgeLogo")
+            Image("ToneLayerLogo")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 88, height: 88)
@@ -313,6 +313,20 @@ struct ContentView: View {
 
                     Button { replaceDraftWithResult() } label: {
                         Label("Replace Draft", systemImage: "arrow.uturn.down")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                }
+
+                HStack(spacing: 10) {
+                    Button { recordSatisfaction(helpful: true) } label: {
+                        Label("Helpful", systemImage: "hand.thumbsup")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+
+                    Button { recordSatisfaction(helpful: false) } label: {
+                        Label("Not Yet", systemImage: "hand.thumbsdown")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
@@ -519,6 +533,17 @@ struct ContentView: View {
         status = "Pasted \(pasted.count) characters"
     }
 
+    private func incrementMetric(_ key: String, by amount: Int = 1) {
+        let fullKey = "metrics.\(key)"
+        UserDefaults.standard.set(UserDefaults.standard.integer(forKey: fullKey) + amount, forKey: fullKey)
+        UserDefaults.standard.set(Date(), forKey: "metrics.lastUpdated")
+    }
+
+    private func recordSatisfaction(helpful: Bool) {
+        incrementMetric(helpful ? "satisfaction.helpful" : "satisfaction.notHelpful")
+        status = helpful ? "Marked helpful" : "Marked for improvement"
+    }
+
     private func clearDraft() {
         draft = ""
         clearerVersion = ""
@@ -531,11 +556,15 @@ struct ContentView: View {
 
     private func copySelectedResult() {
         UIPasteboard.general.string = selectedResultText
+        incrementMetric("rewrite.copied")
+        incrementMetric("rewrite.accepted")
         status = "Copied \(selectedResult)"
     }
 
     private func replaceDraftWithResult() {
         draft = clearerVersion
+        incrementMetric("rewrite.replacedDraft")
+        incrementMetric("rewrite.accepted")
         status = "Draft replaced"
     }
 
@@ -559,6 +588,10 @@ struct ContentView: View {
         }
 
         isRewriting = true
+        incrementMetric("rewrite.requested")
+        if input.count >= 700 || input.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count >= 120 {
+            incrementMetric("longMessage.flagged")
+        }
         status = "Checking message..."
         selectedResult = "Fix"
 
@@ -571,11 +604,13 @@ struct ContentView: View {
                     changeNotes = result.changeNotes
                     learningTakeaway = result.learningTakeaway
                     teachingExplanation = result.teachingExplanation
+                    incrementMetric("rewrite.success")
                     isRewriting = false
                     status = "Ready"
                 }
             } catch {
                 await MainActor.run {
+                    incrementMetric("rewrite.failed")
                     isRewriting = false
                     status = error.localizedDescription
                 }
