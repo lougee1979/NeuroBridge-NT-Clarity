@@ -9,6 +9,12 @@ import SwiftUI
 
 extension Color {
     static let brandTeal = Color(red: 0.094, green: 0.788, blue: 0.604)
+
+    // Apple-keyboard inspired neutrals: high contrast, low visual noise.
+    static let appleKeyboardBackground = Color(red: 0.820, green: 0.840, blue: 0.875)
+    static let appleKeyboardKey = Color.white
+    static let appleKeyboardSpecialKey = Color(red: 0.675, green: 0.705, blue: 0.750)
+    static let appleKeyboardText = Color(red: 0.055, green: 0.065, blue: 0.080)
 }
 
 // MARK: - Principal class
@@ -68,7 +74,7 @@ struct KeyboardView: View {
             Divider()
             mainPanel
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.appleKeyboardBackground)
         .preferredColorScheme(.light)
         .onAppear { loadSettings() }
     }
@@ -119,8 +125,8 @@ struct KeyboardView: View {
                             .font(.system(size: 14, weight: level == l ? .bold : .semibold))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 8)
-                            .background(level == l ? Color.brandTeal : Color(.tertiarySystemBackground))
-                            .foregroundStyle(level == l ? Color.white : Color(red: 0.12, green: 0.15, blue: 0.18))
+                            .background(level == l ? Color.appleKeyboardText : Color.appleKeyboardSpecialKey.opacity(0.78))
+                            .foregroundStyle(level == l ? Color.white : Color.appleKeyboardText)
                             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     }
                     .buttonStyle(.plain)
@@ -152,9 +158,9 @@ struct KeyboardView: View {
     private var rewriteActionRow: some View {
         HStack(spacing: 4) {
             rewriteChip("Clarify", systemImage: "sparkles") { rewrite(style: "Clarify") }
-            rewriteChip("Make Brief", systemImage: nil) { rewrite(style: "Shorter") }
-            rewriteChip("Soften Tone", systemImage: nil) { rewrite(style: "Warmer") }
-            rewriteChip("Be Direct", systemImage: nil) { rewrite(style: "Direct") }
+            rewriteChip("Brief", systemImage: nil) { rewrite(style: "Shorter") }
+            rewriteChip("Soften", systemImage: nil) { rewrite(style: "Warmer") }
+            rewriteChip("Direct", systemImage: nil) { rewrite(style: "Direct") }
         }
     }
 
@@ -186,8 +192,8 @@ struct KeyboardView: View {
                         .font(.system(size: 16))
                         .frame(maxWidth: .infinity)
                         .frame(height: 38)
-                        .background(Color.white)
-                        .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
+                        .background(Color.appleKeyboardKey)
+                        .foregroundStyle(Color.appleKeyboardText)
                         .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                 }
                 .buttonStyle(.plain)
@@ -216,10 +222,10 @@ struct KeyboardView: View {
                 .font(.system(size: 21))
                 .frame(maxWidth: .infinity)
                 .frame(height: 38)
-                .background(Color.white)
-                .foregroundStyle(Color(red: 0.08, green: 0.10, blue: 0.12))
+                .background(Color.appleKeyboardKey)
+                .foregroundStyle(Color.appleKeyboardText)
                 .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                .shadow(color: Color.black.opacity(0.18), radius: 0, x: 0, y: 1)
+                .shadow(color: Color.black.opacity(0.22), radius: 0, x: 0, y: 1)
         }
         .buttonStyle(.plain)
     }
@@ -229,8 +235,8 @@ struct KeyboardView: View {
             Text(title)
                 .font(.system(size: 15, weight: .medium))
                 .frame(width: width, height: 38)
-                .background(highlighted ? Color.white : Color(.systemGray4))
-                .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
+                .background(highlighted ? Color.appleKeyboardKey : Color.appleKeyboardSpecialKey)
+                .foregroundStyle(Color.appleKeyboardText)
                 .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
         }
         .buttonStyle(.plain)
@@ -251,9 +257,10 @@ struct KeyboardView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
-            .background(isRewriting ? Color.brandTeal.opacity(0.55) : Color.white)
-            .foregroundStyle(Color(red: 0.10, green: 0.12, blue: 0.16))
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .background(isRewriting ? Color.appleKeyboardSpecialKey : Color.appleKeyboardKey)
+            .foregroundStyle(Color.appleKeyboardText)
+            .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+            .shadow(color: Color.black.opacity(0.16), radius: 0, x: 0, y: 1)
         }
         .buttonStyle(.plain)
         .disabled(isRewriting)
