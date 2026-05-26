@@ -750,6 +750,16 @@ struct KeyboardView: View {
                 return "Make a strong ND-to-NT rewrite for PTSD + ADHD communication. This should be concise, calm, direct, and almost businesslike. Lead with the point. Remove spirals, defensive language, repeated urgency, over-explanation, and internal processing. Keep the valid need and any necessary context. If the text is asking for help, name the support need in one clean sentence."
             }
 
+        case "Mixed":
+            switch level {
+            case "Light":
+                return "Make a light mixed-needs rewrite. Keep the user's voice, but move the main point earlier, define vague timing, and reduce the most confusing or emotionally loaded phrasing."
+            case "Medium":
+                return "Make a mixed-needs rewrite for overlapping ADHD, autistic, PTSD/CPTSD, and anxiety-related communication needs. Put the main point first. Reduce working-memory load. Make implied meaning explicit. Lower threat signals. Define timing and expectations. End with one clear next step."
+            default:
+                return "Make a strong mixed-needs rewrite. This should be concise, explicit, calm, low-threat, easy to act on, and socially clear. Remove side quests, buried asks, vague hints, defensive wording, repeated urgency, and unclear timing. Preserve the user's meaning and end with one obvious next step."
+            }
+
         default:
             switch level {
             case "Light":  return "Make a light ND-to-NT rewrite. Fix typos and grammar only. Keep all content and voice intact."

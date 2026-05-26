@@ -81,7 +81,7 @@ struct ContentView: View {
     private let apiKeyKey = "ntClarityClaudeAPIKey"
     private let showTeachingKey = "ntClarityShowTeaching"
     private let aiConsentKey = "toneLayerAIProcessingConsent"
-    private let lenses = ["General ND", "ADHD", "Autism", "PTSD / CPTSD"]
+    private let lenses = ["General ND", "ADHD", "Autism", "PTSD / CPTSD", "Mixed"]
     private let goals = ["Make clearer", "Reduce anxiety", "Make actionable"]
     private let resultTabs = ["Fix", "Tone", "Why", "Tip"]
     private let dailyTips: [(title: String, body: String)] = [
@@ -692,6 +692,7 @@ struct ContentView: View {
         ADHD: reduce working-memory load, make priority and next action obvious, avoid buried asks and long multi-step wording.
         Autism: make meaning literal, remove social subtext, state expectations directly, avoid vague phrases like "soon", "later", "we should talk", or "whatever works" unless defined.
         PTSD / CPTSD: reduce threat signals, add reassurance when appropriate, avoid vague warnings, criticism without context, or power-heavy phrasing.
+        Mixed: assume overlapping ADHD, autistic, PTSD/CPTSD, and anxiety-related communication needs. Make the main point obvious first. Reduce working-memory load. Make implied meaning explicit. Remove vague timing or social hints. Lower threat signals and defensive wording. Include reassurance when appropriate. End with one clear next step.
 
         Always respond with ONLY valid JSON:
         {
