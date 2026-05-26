@@ -150,10 +150,10 @@ struct KeyboardView: View {
 
     private var rewriteActionRow: some View {
         HStack(spacing: 4) {
-            rewriteChip("Rewrite", systemImage: "sparkles") { rewrite(style: "Rewrite") }
-            rewriteChip("Shorter", systemImage: nil) { rewrite(style: "Shorter") }
-            rewriteChip("Warmer", systemImage: nil) { rewrite(style: "Warmer") }
-            rewriteChip("Direct", systemImage: nil) { rewrite(style: "Direct") }
+            rewriteChip("Clarify", systemImage: "sparkles") { rewrite(style: "Clarify") }
+            rewriteChip("Make Brief", systemImage: nil) { rewrite(style: "Shorter") }
+            rewriteChip("Soften Tone", systemImage: nil) { rewrite(style: "Warmer") }
+            rewriteChip("Be Direct", systemImage: nil) { rewrite(style: "Direct") }
         }
     }
 
@@ -242,19 +242,19 @@ struct KeyboardView: View {
                 } else if let systemImage {
                     Image(systemName: systemImage).font(.system(size: 11))
                 }
-                Text(isRewriting && title == "Rewrite" ? "Working" : title)
+                Text(isRewriting ? "Working" : title)
                     .font(.system(size: 13, weight: .semibold))
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
-            .background(isRewriting && title == "Rewrite" ? Color.brandTeal.opacity(0.55) : Color.white)
+            .background(isRewriting ? Color.brandTeal.opacity(0.55) : Color.white)
             .foregroundStyle(Color(red: 0.10, green: 0.12, blue: 0.16))
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         }
         .buttonStyle(.plain)
-        .disabled(isRewriting && title == "Rewrite")
+        .disabled(isRewriting)
     }
 
     private var rewriteWindow: some View {
@@ -263,7 +263,7 @@ struct KeyboardView: View {
                 Image(systemName: "sparkles")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(Color.brandTeal)
-                Text("Rewrite window")
+                Text("Message preview")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
                 Spacer()
@@ -282,7 +282,7 @@ struct KeyboardView: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
             } else {
-                Text("Type in any app, then tap Rewrite, Shorter, Warmer, or Direct. The rewritten text is inserted into the message field.")
+                Text("Choose how you want the message to land: clearer, shorter, warmer, or more direct.")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
@@ -398,7 +398,7 @@ struct KeyboardView: View {
 
     // MARK: - Rewrite
 
-    private func rewrite(style: String = "Rewrite") {
+    private func rewrite(style: String = "Clarify") {
         let proxy = inputVC.textDocumentProxy
 
         // documentContextBeforeInput is capped by iOS to ~100–200 chars.
@@ -553,7 +553,7 @@ struct KeyboardView: View {
         var isSpiraling: Bool { !distortions.isEmpty }
     }
 
-    private func callClaude(text: String, style: String = "Rewrite") async throws -> ClaudeResult {
+    private func callClaude(text: String, style: String = "Clarify") async throws -> ClaudeResult {
         guard let apiKey = defaults?.string(forKey: "claudeAPIKey"), !apiKey.isEmpty else {
             throw NBError.noKey
         }
@@ -640,7 +640,7 @@ struct KeyboardView: View {
         return s
     }
 
-    private func buildSystem(style: String = "Rewrite") -> String {
+    private func buildSystem(style: String = "Clarify") -> String {
         let instruction = levelInstruction(level: level, profile: profile)
         let adaptive    = adaptiveContext()
         let styleInstruction: String
@@ -648,6 +648,7 @@ struct KeyboardView: View {
         case "Shorter": styleInstruction = "Make the rewrite shorter. Remove repetition and extra context while preserving the actual point."
         case "Warmer": styleInstruction = "Make the rewrite warmer and more socially soft, without becoming fake or over-apologetic."
         case "Direct": styleInstruction = "Make the rewrite more direct, clear, and action-oriented without sounding harsh."
+        case "Clarify": styleInstruction = "Make the message clearer, easier to read, and closer to the user’s intended meaning."
         default: styleInstruction = "Make a balanced clear rewrite."
         }
         return """

@@ -70,7 +70,7 @@ struct ContentView: View {
     @State private var changeNotes = ""
     @State private var learningTakeaway = ""
     @State private var teachingExplanation = ""
-    @State private var selectedResult = "ND-clear version"
+    @State private var selectedResult = "Clear"
     @State private var showingOptions = false
     @State private var showTeaching = true
     @State private var exportURL: URL?
@@ -81,7 +81,7 @@ struct ContentView: View {
     private let showTeachingKey = "ntClarityShowTeaching"
     private let lenses = ["General ND", "ADHD", "Autism", "PTSD / CPTSD"]
     private let goals = ["Make clearer", "Reduce anxiety", "Make actionable"]
-    private let resultTabs = ["ND-clear version", "What they may hear", "What changed", "Learn"]
+    private let resultTabs = ["Clear", "Heard", "Changed", "Learn"]
     private let dailyTips: [(title: String, body: String)] = [
         (
             "A blocked call may not feel neutral",
@@ -250,7 +250,7 @@ struct ContentView: View {
                     } else {
                         Image(systemName: "wand.and.stars")
                     }
-                    Text(isRewriting ? "Checking..." : "Make ND Clear")
+                    Text(isRewriting ? "Fine-tuning…" : "Clarify")
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
@@ -284,7 +284,7 @@ struct ContentView: View {
                 .textSelection(.enabled)
 
             VStack(alignment: .leading, spacing: 8) {
-                Label("Teaching explanation", systemImage: "lightbulb")
+                Label("Why it works", systemImage: "lightbulb")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Color.brandVioletDark)
                 Text(teachingWindowText)
@@ -388,7 +388,7 @@ struct ContentView: View {
                         .labelsHidden()
                         .onChange(of: showTeaching) { _, newValue in
                             UserDefaults.standard.set(newValue, forKey: showTeachingKey)
-                            if !newValue { selectedResult = "ND-clear version" }
+                            if !newValue { selectedResult = "Clear" }
                         }
                 }
 
@@ -426,8 +426,8 @@ struct ContentView: View {
 
     private var selectedResultText: String {
         switch selectedResult {
-        case "What they may hear": return interpretationRisk
-        case "What changed": return changeNotes
+        case "Heard": return interpretationRisk
+        case "Changed": return changeNotes
         case "Learn": return learningTakeaway
         default: return clearerVersion
         }
@@ -435,9 +435,9 @@ struct ContentView: View {
 
     private var resultWindowText: String {
         guard hasOutput else {
-            return "The rewritten version will appear here."
+            return "Your clearer version will appear here."
         }
-        return selectedResultText.isEmpty ? "The rewritten version will appear here." : selectedResultText
+        return selectedResultText.isEmpty ? "Your clearer version will appear here." : selectedResultText
     }
 
     private var teachingWindowText: String {
@@ -445,7 +445,7 @@ struct ContentView: View {
             return "Teaching explanations are turned off in Options."
         }
         guard hasOutput else {
-            return "After a rewrite, this will explain what the message may sound like to an ND reader and what to change next time."
+            return "After a rewrite, this explains how the message may land and why the wording changed."
         }
         var parts: [String] = []
         if !teachingExplanation.isEmpty {
@@ -512,7 +512,7 @@ struct ContentView: View {
 
         isRewriting = true
         status = "Checking message..."
-        selectedResult = "ND-clear version"
+        selectedResult = "Clear"
 
         Task {
             do {
@@ -613,7 +613,7 @@ struct ContentView: View {
         Always respond with ONLY valid JSON:
         {
           "clearer_version": "the rewritten message the sender can use",
-          "teaching_explanation": "REQUIRED: plain-language explanation of why the original wording may not land clearly for an ND reader and what communication principle the sender should learn",
+          "teaching_explanation": "REQUIRED: plain-language explanation of how the original wording may land to the reader and why the rewrite improves clarity",
           "interpretation_risk": "brief explanation of what the sender may sound like to an ND person and why it may be confusing, threatening, vague, or hard to act on",
           "change_notes": "brief explanation of what changed and why",
           "learning_takeaway": "one reusable rule the NT sender can remember next time, written plainly"
