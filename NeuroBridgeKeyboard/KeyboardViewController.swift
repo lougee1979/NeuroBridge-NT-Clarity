@@ -524,16 +524,16 @@ struct KeyboardView: View {
     private func rewrite(style: String = "Clarify") {
         let proxy = inputVC.textDocumentProxy
 
-        // documentContextBeforeInput is capped by iOS to ~100–200 chars.
-        // Prefer the full text written by the test box (UIKitTextView) to shared UserDefaults.
-        // For other apps, fall back to the proxy (limited to what the host exposes).
+        // Safety rule: never merge text after the cursor into the rewrite.
+        // In real apps, documentContextAfterInput can contain old drafts or unrelated text.
+        // That caused new brain-dump text to be combined with an older letter.
         defaults?.synchronize()
         let before = proxy.documentContextBeforeInput ?? ""
-        let after  = proxy.documentContextAfterInput  ?? ""
-        let proxyText = (before + after).trimmingCharacters(in: .whitespacesAndNewlines)
         let typedText = keyboardTypedText.trimmingCharacters(in: .whitespacesAndNewlines)
-        let full = typedText.isEmpty ? proxyText : typedText
-        let totalToDelete = typedText.isEmpty ? (before.count + after.count) : typedText.count
+        let cursorText = before.trimmingCharacters(in: .whitespacesAndNewlines)
+        let shouldUseTypedText = !typedText.isEmpty && before.hasSuffix(keyboardTypedText)
+        let full = shouldUseTypedText ? typedText : cursorText
+        let totalToDelete = shouldUseTypedText ? keyboardTypedText.count : before.count
 
         guard !full.isEmpty else { showStatus("Type some text first"); return }
 
@@ -554,10 +554,8 @@ struct KeyboardView: View {
             do {
                 let result = try await callClaude(text: full, style: style)
 
-                // Move to the end first. deleteBackward() only removes text before the cursor,
-                // so replacing a pasted brain dump from the middle can otherwise leave one half
-                // of the original untouched.
-                await moveCursorToEnd(proxy: proxy, knownTextCount: full.count)
+                // Replace only the text we intentionally selected for rewriting.
+                // Do not move into documentContextAfterInput; that may be old unrelated text.
 
                 // Chunk the deletion so the host app's IPC can keep up.
                 // Tight 3000-call loops overwhelm UITextDocumentProxy and silently drop most.
