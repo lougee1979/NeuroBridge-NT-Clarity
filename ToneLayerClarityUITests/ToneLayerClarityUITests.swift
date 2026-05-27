@@ -3,15 +3,15 @@
 // distribution, or derivative use is prohibited.
 
 //
-//  NeuroBridgeUITests.swift
-//  NeuroBridgeUITests
+//  ToneLayerClarityUITests.swift
+//  ToneLayerClarityUITests
 //
 //  Created by Alden-Edwin Lougee on 5/3/26.
 //
 
 import XCTest
 
-final class NeuroBridgeUITests: XCTestCase {
+final class ToneLayerClarityUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.

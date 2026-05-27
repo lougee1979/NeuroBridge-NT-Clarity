@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BF6B1D0D2FA789DF00AD43B9 /* NeuroBridgeKeyboard.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = BF6B1D062FA789DF00AD43B9 /* NeuroBridgeKeyboard.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		BF6B1D0D2FA789DF00AD43B9 /* ToneLayerClarityKeyboard.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = BF6B1D062FA789DF00AD43B9 /* ToneLayerClarityKeyboard.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -16,21 +16,21 @@
 			containerPortal = BF6B1CD02FA7896F00AD43B9 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = BF6B1CD72FA7896F00AD43B9;
-			remoteInfo = NeuroBridge;
+			remoteInfo = ToneLayerClarity;
 		};
 		BF6B1CF02FA7897000AD43B9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BF6B1CD02FA7896F00AD43B9 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = BF6B1CD72FA7896F00AD43B9;
-			remoteInfo = NeuroBridge;
+			remoteInfo = ToneLayerClarity;
 		};
 		BF6B1D0B2FA789DF00AD43B9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BF6B1CD02FA7896F00AD43B9 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = BF6B1D052FA789DF00AD43B9;
-			remoteInfo = NeuroBridgeKeyboard;
+			remoteInfo = ToneLayerClarityKeyboard;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -41,7 +41,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				BF6B1D0D2FA789DF00AD43B9 /* NeuroBridgeKeyboard.appex in Embed Foundation Extensions */,
+				BF6B1D0D2FA789DF00AD43B9 /* ToneLayerClarityKeyboard.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -49,44 +49,44 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		BF6B1CD82FA7896F00AD43B9 /* NeuroBridge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NeuroBridge.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		BF6B1CE52FA7897000AD43B9 /* NeuroBridgeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NeuroBridgeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		BF6B1CEF2FA7897000AD43B9 /* NeuroBridgeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NeuroBridgeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		BF6B1D062FA789DF00AD43B9 /* NeuroBridgeKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NeuroBridgeKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF6B1CD82FA7896F00AD43B9 /* ToneLayerClarity.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ToneLayerClarity.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF6B1CE52FA7897000AD43B9 /* ToneLayerClarityTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ToneLayerClarityTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF6B1CEF2FA7897000AD43B9 /* ToneLayerClarityUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ToneLayerClarityUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF6B1D062FA789DF00AD43B9 /* ToneLayerClarityKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ToneLayerClarityKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		BF6B1D0E2FA789DF00AD43B9 /* Exceptions for "NeuroBridgeKeyboard" folder in "NeuroBridgeKeyboard" target */ = {
+		BF6B1D0E2FA789DF00AD43B9 /* Exceptions for "ToneLayerClarityKeyboard" folder in "ToneLayerClarityKeyboard" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = BF6B1D052FA789DF00AD43B9 /* NeuroBridgeKeyboard */;
+			target = BF6B1D052FA789DF00AD43B9 /* ToneLayerClarityKeyboard */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		BF6B1CDA2FA7896F00AD43B9 /* NeuroBridge */ = {
+		BF6B1CDA2FA7896F00AD43B9 /* ToneLayerClarity */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NeuroBridge;
+			path = ToneLayerClarity;
 			sourceTree = "<group>";
 		};
-		BF6B1CE82FA7897000AD43B9 /* NeuroBridgeTests */ = {
+		BF6B1CE82FA7897000AD43B9 /* ToneLayerClarityTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NeuroBridgeTests;
+			path = ToneLayerClarityTests;
 			sourceTree = "<group>";
 		};
-		BF6B1CF22FA7897000AD43B9 /* NeuroBridgeUITests */ = {
+		BF6B1CF22FA7897000AD43B9 /* ToneLayerClarityUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NeuroBridgeUITests;
+			path = ToneLayerClarityUITests;
 			sourceTree = "<group>";
 		};
-		BF6B1D072FA789DF00AD43B9 /* NeuroBridgeKeyboard */ = {
+		BF6B1D072FA789DF00AD43B9 /* ToneLayerClarityKeyboard */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				BF6B1D0E2FA789DF00AD43B9 /* Exceptions for "NeuroBridgeKeyboard" folder in "NeuroBridgeKeyboard" target */,
+				BF6B1D0E2FA789DF00AD43B9 /* Exceptions for "ToneLayerClarityKeyboard" folder in "ToneLayerClarityKeyboard" target */,
 			);
-			path = NeuroBridgeKeyboard;
+			path = ToneLayerClarityKeyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -126,10 +126,10 @@
 		BF6B1CCF2FA7896F00AD43B9 = {
 			isa = PBXGroup;
 			children = (
-				BF6B1CDA2FA7896F00AD43B9 /* NeuroBridge */,
-				BF6B1CE82FA7897000AD43B9 /* NeuroBridgeTests */,
-				BF6B1CF22FA7897000AD43B9 /* NeuroBridgeUITests */,
-				BF6B1D072FA789DF00AD43B9 /* NeuroBridgeKeyboard */,
+				BF6B1CDA2FA7896F00AD43B9 /* ToneLayerClarity */,
+				BF6B1CE82FA7897000AD43B9 /* ToneLayerClarityTests */,
+				BF6B1CF22FA7897000AD43B9 /* ToneLayerClarityUITests */,
+				BF6B1D072FA789DF00AD43B9 /* ToneLayerClarityKeyboard */,
 				BF6B1CD92FA7896F00AD43B9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -137,10 +137,10 @@
 		BF6B1CD92FA7896F00AD43B9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				BF6B1CD82FA7896F00AD43B9 /* NeuroBridge.app */,
-				BF6B1CE52FA7897000AD43B9 /* NeuroBridgeTests.xctest */,
-				BF6B1CEF2FA7897000AD43B9 /* NeuroBridgeUITests.xctest */,
-				BF6B1D062FA789DF00AD43B9 /* NeuroBridgeKeyboard.appex */,
+				BF6B1CD82FA7896F00AD43B9 /* ToneLayerClarity.app */,
+				BF6B1CE52FA7897000AD43B9 /* ToneLayerClarityTests.xctest */,
+				BF6B1CEF2FA7897000AD43B9 /* ToneLayerClarityUITests.xctest */,
+				BF6B1D062FA789DF00AD43B9 /* ToneLayerClarityKeyboard.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -148,9 +148,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		BF6B1CD72FA7896F00AD43B9 /* NeuroBridge */ = {
+		BF6B1CD72FA7896F00AD43B9 /* ToneLayerClarity */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BF6B1CF92FA7897000AD43B9 /* Build configuration list for PBXNativeTarget "NeuroBridge" */;
+			buildConfigurationList = BF6B1CF92FA7897000AD43B9 /* Build configuration list for PBXNativeTarget "ToneLayerClarity" */;
 			buildPhases = (
 				BF6B1CD42FA7896F00AD43B9 /* Sources */,
 				BF6B1CD52FA7896F00AD43B9 /* Frameworks */,
@@ -163,18 +163,18 @@
 				BF6B1D0C2FA789DF00AD43B9 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				BF6B1CDA2FA7896F00AD43B9 /* NeuroBridge */,
+				BF6B1CDA2FA7896F00AD43B9 /* ToneLayerClarity */,
 			);
-			name = NeuroBridge;
+			name = ToneLayerClarity;
 			packageProductDependencies = (
 			);
-			productName = NeuroBridge;
-			productReference = BF6B1CD82FA7896F00AD43B9 /* NeuroBridge.app */;
+			productName = ToneLayerClarity;
+			productReference = BF6B1CD82FA7896F00AD43B9 /* ToneLayerClarity.app */;
 			productType = "com.apple.product-type.application";
 		};
-		BF6B1CE42FA7897000AD43B9 /* NeuroBridgeTests */ = {
+		BF6B1CE42FA7897000AD43B9 /* ToneLayerClarityTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BF6B1CFC2FA7897000AD43B9 /* Build configuration list for PBXNativeTarget "NeuroBridgeTests" */;
+			buildConfigurationList = BF6B1CFC2FA7897000AD43B9 /* Build configuration list for PBXNativeTarget "ToneLayerClarityTests" */;
 			buildPhases = (
 				BF6B1CE12FA7897000AD43B9 /* Sources */,
 				BF6B1CE22FA7897000AD43B9 /* Frameworks */,
@@ -186,18 +186,18 @@
 				BF6B1CE72FA7897000AD43B9 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				BF6B1CE82FA7897000AD43B9 /* NeuroBridgeTests */,
+				BF6B1CE82FA7897000AD43B9 /* ToneLayerClarityTests */,
 			);
-			name = NeuroBridgeTests;
+			name = ToneLayerClarityTests;
 			packageProductDependencies = (
 			);
-			productName = NeuroBridgeTests;
-			productReference = BF6B1CE52FA7897000AD43B9 /* NeuroBridgeTests.xctest */;
+			productName = ToneLayerClarityTests;
+			productReference = BF6B1CE52FA7897000AD43B9 /* ToneLayerClarityTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		BF6B1CEE2FA7897000AD43B9 /* NeuroBridgeUITests */ = {
+		BF6B1CEE2FA7897000AD43B9 /* ToneLayerClarityUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BF6B1CFF2FA7897000AD43B9 /* Build configuration list for PBXNativeTarget "NeuroBridgeUITests" */;
+			buildConfigurationList = BF6B1CFF2FA7897000AD43B9 /* Build configuration list for PBXNativeTarget "ToneLayerClarityUITests" */;
 			buildPhases = (
 				BF6B1CEB2FA7897000AD43B9 /* Sources */,
 				BF6B1CEC2FA7897000AD43B9 /* Frameworks */,
@@ -209,18 +209,18 @@
 				BF6B1CF12FA7897000AD43B9 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				BF6B1CF22FA7897000AD43B9 /* NeuroBridgeUITests */,
+				BF6B1CF22FA7897000AD43B9 /* ToneLayerClarityUITests */,
 			);
-			name = NeuroBridgeUITests;
+			name = ToneLayerClarityUITests;
 			packageProductDependencies = (
 			);
-			productName = NeuroBridgeUITests;
-			productReference = BF6B1CEF2FA7897000AD43B9 /* NeuroBridgeUITests.xctest */;
+			productName = ToneLayerClarityUITests;
+			productReference = BF6B1CEF2FA7897000AD43B9 /* ToneLayerClarityUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		BF6B1D052FA789DF00AD43B9 /* NeuroBridgeKeyboard */ = {
+		BF6B1D052FA789DF00AD43B9 /* ToneLayerClarityKeyboard */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BF6B1D0F2FA789DF00AD43B9 /* Build configuration list for PBXNativeTarget "NeuroBridgeKeyboard" */;
+			buildConfigurationList = BF6B1D0F2FA789DF00AD43B9 /* Build configuration list for PBXNativeTarget "ToneLayerClarityKeyboard" */;
 			buildPhases = (
 				BF6B1D022FA789DF00AD43B9 /* Sources */,
 				BF6B1D032FA789DF00AD43B9 /* Frameworks */,
@@ -231,13 +231,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				BF6B1D072FA789DF00AD43B9 /* NeuroBridgeKeyboard */,
+				BF6B1D072FA789DF00AD43B9 /* ToneLayerClarityKeyboard */,
 			);
-			name = NeuroBridgeKeyboard;
+			name = ToneLayerClarityKeyboard;
 			packageProductDependencies = (
 			);
-			productName = NeuroBridgeKeyboard;
-			productReference = BF6B1D062FA789DF00AD43B9 /* NeuroBridgeKeyboard.appex */;
+			productName = ToneLayerClarityKeyboard;
+			productReference = BF6B1D062FA789DF00AD43B9 /* ToneLayerClarityKeyboard.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -266,7 +266,7 @@
 					};
 				};
 			};
-			buildConfigurationList = BF6B1CD32FA7896F00AD43B9 /* Build configuration list for PBXProject "NeuroBridge" */;
+			buildConfigurationList = BF6B1CD32FA7896F00AD43B9 /* Build configuration list for PBXProject "ToneLayerClarity" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -280,10 +280,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				BF6B1CD72FA7896F00AD43B9 /* NeuroBridge */,
-				BF6B1CE42FA7897000AD43B9 /* NeuroBridgeTests */,
-				BF6B1CEE2FA7897000AD43B9 /* NeuroBridgeUITests */,
-				BF6B1D052FA789DF00AD43B9 /* NeuroBridgeKeyboard */,
+				BF6B1CD72FA7896F00AD43B9 /* ToneLayerClarity */,
+				BF6B1CE42FA7897000AD43B9 /* ToneLayerClarityTests */,
+				BF6B1CEE2FA7897000AD43B9 /* ToneLayerClarityUITests */,
+				BF6B1D052FA789DF00AD43B9 /* ToneLayerClarityKeyboard */,
 			);
 		};
 /* End PBXProject section */
@@ -353,17 +353,17 @@
 /* Begin PBXTargetDependency section */
 		BF6B1CE72FA7897000AD43B9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = BF6B1CD72FA7896F00AD43B9 /* NeuroBridge */;
+			target = BF6B1CD72FA7896F00AD43B9 /* ToneLayerClarity */;
 			targetProxy = BF6B1CE62FA7897000AD43B9 /* PBXContainerItemProxy */;
 		};
 		BF6B1CF12FA7897000AD43B9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = BF6B1CD72FA7896F00AD43B9 /* NeuroBridge */;
+			target = BF6B1CD72FA7896F00AD43B9 /* ToneLayerClarity */;
 			targetProxy = BF6B1CF02FA7897000AD43B9 /* PBXContainerItemProxy */;
 		};
 		BF6B1D0C2FA789DF00AD43B9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = BF6B1D052FA789DF00AD43B9 /* NeuroBridgeKeyboard */;
+			target = BF6B1D052FA789DF00AD43B9 /* ToneLayerClarityKeyboard */;
 			targetProxy = BF6B1D0B2FA789DF00AD43B9 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -497,7 +497,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = NeuroBridge/NeuroBridge.entitlements;
+				CODE_SIGN_ENTITLEMENTS = ToneLayerClarity/ToneLayerClarity.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 466RHQ4TLW;
@@ -532,7 +532,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = NeuroBridge/NeuroBridge.entitlements;
+				CODE_SIGN_ENTITLEMENTS = ToneLayerClarity/ToneLayerClarity.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 466RHQ4TLW;
@@ -580,7 +580,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NeuroBridge.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NeuroBridge";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ToneLayerClarity.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ToneLayerClarity";
 			};
 			name = Debug;
 		};
@@ -602,7 +602,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NeuroBridge.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NeuroBridge";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ToneLayerClarity.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ToneLayerClarity";
 			};
 			name = Release;
 		};
@@ -622,7 +622,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = NeuroBridge;
+				TEST_TARGET_NAME = ToneLayerClarity;
 			};
 			name = Debug;
 		};
@@ -642,19 +642,19 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = NeuroBridge;
+				TEST_TARGET_NAME = ToneLayerClarity;
 			};
 			name = Release;
 		};
 		BF6B1D102FA789DF00AD43B9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = NeuroBridgeKeyboard/NeuroBridgeKeyboard.entitlements;
+				CODE_SIGN_ENTITLEMENTS = ToneLayerClarityKeyboard/ToneLayerClarityKeyboard.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 466RHQ4TLW;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = NeuroBridgeKeyboard/Info.plist;
+				INFOPLIST_FILE = ToneLayerClarityKeyboard/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "ToneLayer Keyboard";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -678,12 +678,12 @@
 		BF6B1D112FA789DF00AD43B9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = NeuroBridgeKeyboard/NeuroBridgeKeyboard.entitlements;
+				CODE_SIGN_ENTITLEMENTS = ToneLayerClarityKeyboard/ToneLayerClarityKeyboard.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 466RHQ4TLW;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = NeuroBridgeKeyboard/Info.plist;
+				INFOPLIST_FILE = ToneLayerClarityKeyboard/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "ToneLayer Keyboard";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -707,7 +707,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		BF6B1CD32FA7896F00AD43B9 /* Build configuration list for PBXProject "NeuroBridge" */ = {
+		BF6B1CD32FA7896F00AD43B9 /* Build configuration list for PBXProject "ToneLayerClarity" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BF6B1CF72FA7897000AD43B9 /* Debug */,
@@ -716,7 +716,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		BF6B1CF92FA7897000AD43B9 /* Build configuration list for PBXNativeTarget "NeuroBridge" */ = {
+		BF6B1CF92FA7897000AD43B9 /* Build configuration list for PBXNativeTarget "ToneLayerClarity" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BF6B1CFA2FA7897000AD43B9 /* Debug */,
@@ -725,7 +725,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		BF6B1CFC2FA7897000AD43B9 /* Build configuration list for PBXNativeTarget "NeuroBridgeTests" */ = {
+		BF6B1CFC2FA7897000AD43B9 /* Build configuration list for PBXNativeTarget "ToneLayerClarityTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BF6B1CFD2FA7897000AD43B9 /* Debug */,
@@ -734,7 +734,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		BF6B1CFF2FA7897000AD43B9 /* Build configuration list for PBXNativeTarget "NeuroBridgeUITests" */ = {
+		BF6B1CFF2FA7897000AD43B9 /* Build configuration list for PBXNativeTarget "ToneLayerClarityUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BF6B1D002FA7897000AD43B9 /* Debug */,
@@ -743,7 +743,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		BF6B1D0F2FA789DF00AD43B9 /* Build configuration list for PBXNativeTarget "NeuroBridgeKeyboard" */ = {
+		BF6B1D0F2FA789DF00AD43B9 /* Build configuration list for PBXNativeTarget "ToneLayerClarityKeyboard" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BF6B1D102FA789DF00AD43B9 /* Debug */,

@@ -3,15 +3,15 @@
 // distribution, or derivative use is prohibited.
 
 //
-//  NeuroBridgeUITestsLaunchTests.swift
-//  NeuroBridgeUITests
+//  ToneLayerClarityUITestsLaunchTests.swift
+//  ToneLayerClarityUITests
 //
 //  Created by Alden-Edwin Lougee on 5/3/26.
 //
 
 import XCTest
 
-final class NeuroBridgeUITestsLaunchTests: XCTestCase {
+final class ToneLayerClarityUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

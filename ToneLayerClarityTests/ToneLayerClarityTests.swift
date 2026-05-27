@@ -3,16 +3,16 @@
 // distribution, or derivative use is prohibited.
 
 //
-//  NeuroBridgeTests.swift
-//  NeuroBridgeTests
+//  ToneLayerClarityTests.swift
+//  ToneLayerClarityTests
 //
 //  Created by Alden-Edwin Lougee on 5/3/26.
 //
 
 import Testing
-@testable import NeuroBridge
+@testable import ToneLayerClarity
 
-struct NeuroBridgeTests {
+struct ToneLayerClarityTests {
 
     @Test func example() async throws {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.

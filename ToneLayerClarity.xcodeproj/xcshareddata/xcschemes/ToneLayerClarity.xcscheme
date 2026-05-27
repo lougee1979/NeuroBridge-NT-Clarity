@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BF6B1D052FA789DF00AD43B9"
-               BuildableName = "NeuroBridgeKeyboard.appex"
-               BlueprintName = "NeuroBridgeKeyboard"
-               ReferencedContainer = "container:NeuroBridge.xcodeproj">
+               BlueprintIdentifier = "BF6B1CD72FA7896F00AD43B9"
+               BuildableName = "ToneLayerClarity.app"
+               BlueprintName = "ToneLayerClarity"
+               ReferencedContainer = "container:ToneLayerClarity.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -28,6 +28,16 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "BF6B1CE42FA7897000AD43B9"
+               BuildableName = "ToneLayerClarityTests.xctest"
+               BlueprintName = "ToneLayerClarityTests"
+               ReferencedContainer = "container:ToneLayerClarity.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
@@ -44,10 +54,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BF6B1D052FA789DF00AD43B9"
-            BuildableName = "NeuroBridgeKeyboard.appex"
-            BlueprintName = "NeuroBridgeKeyboard"
-            ReferencedContainer = "container:NeuroBridge.xcodeproj">
+            BlueprintIdentifier = "BF6B1CD72FA7896F00AD43B9"
+            BuildableName = "ToneLayerClarity.app"
+            BlueprintName = "ToneLayerClarity"
+            ReferencedContainer = "container:ToneLayerClarity.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -57,6 +67,16 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "BF6B1CD72FA7896F00AD43B9"
+            BuildableName = "ToneLayerClarity.app"
+            BlueprintName = "ToneLayerClarity"
+            ReferencedContainer = "container:ToneLayerClarity.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BF6B1CD72FA7896F00AD43B9"
-               BuildableName = "NeuroBridge.app"
-               BlueprintName = "NeuroBridge"
-               ReferencedContainer = "container:NeuroBridge.xcodeproj">
+               BlueprintIdentifier = "BF6B1D052FA789DF00AD43B9"
+               BuildableName = "ToneLayerClarityKeyboard.appex"
+               BlueprintName = "ToneLayerClarityKeyboard"
+               ReferencedContainer = "container:ToneLayerClarity.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -28,16 +28,6 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BF6B1CE42FA7897000AD43B9"
-               BuildableName = "NeuroBridgeTests.xctest"
-               BlueprintName = "NeuroBridgeTests"
-               ReferencedContainer = "container:NeuroBridge.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
@@ -54,10 +44,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BF6B1CD72FA7896F00AD43B9"
-            BuildableName = "NeuroBridge.app"
-            BlueprintName = "NeuroBridge"
-            ReferencedContainer = "container:NeuroBridge.xcodeproj">
+            BlueprintIdentifier = "BF6B1D052FA789DF00AD43B9"
+            BuildableName = "ToneLayerClarityKeyboard.appex"
+            BlueprintName = "ToneLayerClarityKeyboard"
+            ReferencedContainer = "container:ToneLayerClarity.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -67,16 +57,6 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BF6B1CD72FA7896F00AD43B9"
-            BuildableName = "NeuroBridge.app"
-            BlueprintName = "NeuroBridge"
-            ReferencedContainer = "container:NeuroBridge.xcodeproj">
-         </BuildableReference>
-      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
