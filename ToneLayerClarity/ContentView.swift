@@ -328,6 +328,24 @@ struct ContentView: View {
             .background(Color.clarityGreenSoft.opacity(0.95))
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
+            // Teaching card — shown prominently below the result whenever showTeaching is on
+            if hasOutput && showTeaching {
+                teachingCard
+            }
+
+            if !showTeaching && hasOutput {
+                Button {
+                    withAnimation { showTeaching = true }
+                    UserDefaults.standard.set(true, forKey: showTeachingKey)
+                    syncKeyboardSettings()
+                } label: {
+                    Label("Show teaching explanation", systemImage: "lightbulb")
+                        .font(.caption)
+                        .foregroundStyle(Color.clarityGreen)
+                }
+                .buttonStyle(.plain)
+            }
+
             if hasOutput {
                 HStack(spacing: 10) {
                     Button { copySelectedResult() } label: {
@@ -403,6 +421,59 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
         .glassCard(tint: .clarityGreen, cornerRadius: 18)
+    }
+
+    private var teachingCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label("How this lands", systemImage: "lightbulb.fill")
+                    .font(.headline)
+                    .foregroundStyle(Color.clarityGreen)
+                Spacer()
+                Button {
+                    withAnimation { showTeaching = false }
+                    UserDefaults.standard.set(false, forKey: showTeachingKey)
+                    syncKeyboardSettings()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(Color.secondary.opacity(0.6))
+                        .font(.body)
+                }
+                .buttonStyle(.plain)
+            }
+
+            if !teachingExplanation.isEmpty {
+                Text(teachingExplanation)
+                    .font(.body)
+                    .foregroundStyle(Color.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if !learningTakeaway.isEmpty {
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "arrow.right.circle.fill")
+                        .foregroundStyle(Color.clarityGreen)
+                        .font(.subheadline)
+                        .padding(.top, 2)
+                    Text(learningTakeaway)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.clarityGreenSoft)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(Color.clarityGreenSoft.opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(Color.clarityGreen.opacity(0.25), lineWidth: 1)
+        )
     }
 
     private var optionsCard: some View {
@@ -491,21 +562,9 @@ struct ContentView: View {
             .split { $0.isWhitespace || $0.isNewline }
             .count
         let chars = draft.count
-        let isLong = chars >= 700 || words >= 120
-        return VStack(alignment: .leading, spacing: 6) {
-            Text("\(chars) chars \u{2022} \(words) words")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            if isLong {
-                Text("This is getting long for a text. Are you okay? If this is turning into a novel, try Clarify or Make Brief before sending.")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color(red: 0.42, green: 0.24, blue: 0.02))
-                    .padding(10)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.yellow.opacity(0.18))
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            }
-        }
+        return Text("\(chars) chars \u{2022} \(words) words")
+            .font(.caption)
+            .foregroundStyle(.secondary)
     }
 
     private var hasOutput: Bool {
@@ -624,9 +683,6 @@ struct ContentView: View {
 
         isRewriting = true
         incrementMetric("rewrite.requested")
-        if input.count >= 700 || input.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count >= 120 {
-            incrementMetric("longMessage.flagged")
-        }
         status = "Checking message..."
         selectedResult = "Rewrite"
 
@@ -723,17 +779,17 @@ struct ContentView: View {
 
         General ND: remove ambiguity, make the ask explicit, add necessary context, state urgency, and give a concrete next step.
         ADHD: reduce working-memory load, make priority and next action obvious, avoid buried asks and long multi-step wording.
-        Autism: make meaning literal, remove social subtext, state expectations directly, avoid vague phrases like \"soon\", \"later\", \"we should talk\", or \"whatever works\" unless defined.
+        Autism: make meaning literal, remove social subtext, state expectations directly, avoid vague phrases like "soon", "later", "we should talk", or "whatever works" unless defined.
         PTSD / CPTSD: reduce threat signals, add reassurance when appropriate, avoid vague warnings, criticism without context, or power-heavy phrasing.
         Mixed: assume overlapping ADHD, autistic, PTSD/CPTSD, and anxiety-related communication needs. Make the main point obvious first. Reduce working-memory load. Make implied meaning explicit. Remove vague timing or social hints. Lower threat signals and defensive wording. Include reassurance when appropriate. End with one clear next step.
 
         Always respond with ONLY valid JSON:
         {
-          \"clearer_version\": \"the rewritten message the sender can use\",
-          \"teaching_explanation\": \"REQUIRED: plain-language explanation of how the original wording may land to the reader and why the rewrite improves clarity\",
-          \"interpretation_risk\": \"brief explanation of what the sender may sound like to an ND person and why it may be confusing, threatening, vague, or hard to act on\",
-          \"change_notes\": \"brief explanation of what changed and why\",
-          \"learning_takeaway\": \"one reusable rule the NT sender can remember next time, written plainly\"
+          "clearer_version": "the rewritten message the sender can use",
+          "teaching_explanation": "REQUIRED: plain-language explanation of how the original wording may land to the reader and why the rewrite improves clarity",
+          "interpretation_risk": "brief explanation of what the sender may sound like to an ND person and why it may be confusing, threatening, vague, or hard to act on",
+          "change_notes": "brief explanation of what changed and why",
+          "learning_takeaway": "one reusable rule the NT sender can remember next time, written plainly"
         }
         """
     }
