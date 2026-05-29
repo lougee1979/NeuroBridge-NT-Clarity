@@ -10,13 +10,13 @@ import SwiftUI
 extension Color {
     static let toneLayerBlue = Color(red: 0.145, green: 0.388, blue: 0.922)
     static let brandTeal = Color(red: 0.145, green: 0.388, blue: 0.922)
-    static let toneLayerBlueSoft = Color(red: 0.859, green: 0.918, blue: 0.996)
+    static let toneLayerBlueSoft = Color(red: 0.80, green: 0.87, blue: 0.99)
     static let clarityGreen = Color(red: 0.047, green: 0.525, blue: 0.318)
     static let clarityPurple = Color(red: 0.435, green: 0.310, blue: 0.745)
-    static let clarityPurpleSoft = Color(red: 0.941, green: 0.922, blue: 0.988)
+    static let clarityPurpleSoft = Color(red: 0.89, green: 0.85, blue: 0.99)
 
     // Apple-keyboard inspired neutrals: high contrast, low visual noise.
-    static let appleKeyboardBackground = Color(red: 0.859, green: 0.918, blue: 0.996)
+    static let appleKeyboardBackground = Color(red: 0.80, green: 0.87, blue: 0.99)
     static let appleKeyboardKey = Color.white
     static let appleKeyboardSpecialKey = Color(red: 0.725, green: 0.808, blue: 0.949)
     static let appleKeyboardText = Color(red: 0.055, green: 0.065, blue: 0.080)
@@ -121,6 +121,8 @@ struct KeyboardView: View {
     @State private var isNumbers = false
     @State private var lastRewriteStyle = "Rewrite"
     @State private var keyboardTypedText = ""
+    @State private var previewText = ""
+    @State private var pendingDeleteCount = 0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -130,7 +132,13 @@ struct KeyboardView: View {
         }
         .frame(maxWidth: .infinity)
         .clipped()
-        .background(keyboardMode.softBackground)
+        .background(
+            LinearGradient(
+                colors: [keyboardMode.accent.opacity(0.13), keyboardMode.softBackground],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
         .preferredColorScheme(.light)
         .onAppear { loadSettings() }
     }
@@ -175,7 +183,7 @@ struct KeyboardView: View {
     // MARK: - Main panel
 
     private var mainPanel: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 8) {
             modeSelector
                 .padding(.horizontal, 8)
 
@@ -216,7 +224,7 @@ struct KeyboardView: View {
                 .padding(.horizontal, 4)
                 .padding(.bottom, 4)
         }
-        .padding(.top, 10)
+        .padding(.top, 8)
     }
 
     private var modeSelector: some View {
@@ -283,7 +291,7 @@ struct KeyboardView: View {
                     Text("space")
                         .font(.system(size: 16))
                         .frame(maxWidth: .infinity)
-                        .frame(height: 38)
+                        .frame(height: 42)
                         .background(Color.appleKeyboardKey)
                         .foregroundStyle(Color.appleKeyboardText)
                         .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
@@ -313,7 +321,7 @@ struct KeyboardView: View {
             Text(isShifted ? key.uppercased() : key)
                 .font(.system(size: 21))
                 .frame(maxWidth: .infinity)
-                .frame(height: 38)
+                .frame(height: 42)
                 .background(Color.appleKeyboardKey)
                 .foregroundStyle(Color.appleKeyboardText)
                 .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
@@ -328,7 +336,7 @@ struct KeyboardView: View {
                 .font(.system(size: 15, weight: .medium))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-                .frame(width: width, height: 38)
+                .frame(width: width, height: 42)
                 .background(highlighted ? Color.appleKeyboardKey : keyboardMode.specialKey)
                 .foregroundStyle(Color.appleKeyboardText)
                 .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
@@ -361,7 +369,7 @@ struct KeyboardView: View {
     }
 
     private var rewriteWindow: some View {
-        VStack(alignment: .leading, spacing: 5) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
                 Image(systemName: "sparkles")
                     .font(.system(size: 11, weight: .semibold))
@@ -370,20 +378,72 @@ struct KeyboardView: View {
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
                 Spacer()
-                Text(lastRewriteStyle)
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(.secondary)
+                if !previewText.isEmpty {
+                    Button {
+                        previewText = ""
+                        pendingDeleteCount = 0
+                        showSpiral = false
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                            .font(.system(size: 16))
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    Text(lastRewriteStyle)
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                }
             }
 
-            if showSpiral {
-                Text("Pause check: this may land differently than intended. Choose As-is, Grammar, or NT.")
+            if !previewText.isEmpty {
+                Text(previewText)
                     .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-            } else if !explanation.isEmpty && showExpl {
-                Text(explanation)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
+                    .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
+                    .lineLimit(4)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if showSpiral {
+                    Text("This may land differently than intended — choose a version:")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                    HStack(spacing: 6) {
+                        chipButton("Keep original", primary: false) {
+                            previewText = ""
+                            pendingDeleteCount = 0
+                            showSpiral = false
+                        }
+                        chipButton("Grammar only", primary: false) {
+                            previewText = spiralGrammar.isEmpty ? spiralOriginal : spiralGrammar
+                            showSpiral = false
+                        }
+                        chipButton("NT version", primary: true) {
+                            previewText = spiralNT
+                            showSpiral = false
+                        }
+                    }
+                } else {
+                    if showExpl && !explanation.isEmpty {
+                        Text(explanation)
+                            .font(.system(size: 10))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                    }
+                    Button(action: applyPreview) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.circle.fill")
+                            Text("Insert")
+                                .fontWeight(.semibold)
+                        }
+                        .font(.system(size: 13))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 7)
+                        .background(keyboardMode.accent)
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                }
             } else {
                 Text(keyboardMode.previewHelp)
                     .font(.system(size: 11))
@@ -523,15 +583,12 @@ struct KeyboardView: View {
 
     private func rewrite(style: String = "Clarify") {
         let proxy = inputVC.textDocumentProxy
-
-        // Safety rule: never merge text after the cursor into the rewrite.
-        // In real apps, documentContextAfterInput can contain old drafts or unrelated text.
-        // That caused new brain-dump text to be combined with an older letter.
         defaults?.synchronize()
         let before = proxy.documentContextBeforeInput ?? ""
         let typedText = keyboardTypedText.trimmingCharacters(in: .whitespacesAndNewlines)
         let cursorText = before.trimmingCharacters(in: .whitespacesAndNewlines)
-        let shouldUseTypedText = !typedText.isEmpty && before.hasSuffix(keyboardTypedText)
+        // Fall back to tracked typed text when proxy returns nothing (e.g. Mail's rich text editor)
+        let shouldUseTypedText = !typedText.isEmpty && (cursorText.isEmpty || before.hasSuffix(keyboardTypedText))
         let full = shouldUseTypedText ? typedText : cursorText
         let totalToDelete = shouldUseTypedText ? keyboardTypedText.count : before.count
 
@@ -545,57 +602,35 @@ struct KeyboardView: View {
         }
         showStatus("Sending \(full.count) chars…")
         isRewriting = true
+        previewText = ""
+        pendingDeleteCount = 0
         explanation = ""
-        showSpiral  = false
+        showSpiral = false
         defaults?.set(true, forKey: "keyboardRewriteInProgress")
         defaults?.synchronize()
 
         Task {
             do {
                 let result = try await callClaude(text: full, style: style)
-
-                // Replace only the text we intentionally selected for rewriting.
-                // Do not move into documentContextAfterInput; that may be old unrelated text.
-
-                // Chunk the deletion so the host app's IPC can keep up.
-                // Tight 3000-call loops overwhelm UITextDocumentProxy and silently drop most.
-                await deleteBackwardChunked(proxy: proxy, count: totalToDelete)
-
-                await insertTextChunked(proxy: proxy, text: result.rewrite)
                 await MainActor.run {
                     isRewriting = false
+                    defaults?.set(false, forKey: "keyboardRewriteInProgress")
+                    defaults?.synchronize()
+                    pendingDeleteCount = totalToDelete
+                    previewText = result.rewrite
 
                     if spiralEnabled && result.isSpiraling {
-                        spiralNT      = result.rewrite
+                        spiralNT = result.rewrite
                         spiralGrammar = result.grammarOnly
                         spiralOriginal = full
-                        spiralOriginalCount = full.count
-                    }
-                }
-
-                if spiralEnabled && result.isSpiraling {
-                    await deleteBackwardChunked(proxy: proxy, count: result.rewrite.count)
-                    await insertTextChunked(proxy: proxy, text: full)
-                    await MainActor.run {
-                        defaults?.set(full, forKey: "testBoxFullText")
-                        defaults?.set(false, forKey: "keyboardRewriteInProgress")
-                        defaults?.synchronize()
+                        spiralOriginalCount = totalToDelete
                         withAnimation { showSpiral = true }
-                    }
-                } else {
-                    await MainActor.run {
-                        keyboardTypedText = result.rewrite
-                        defaults?.set(result.rewrite, forKey: "testBoxFullText")
-                        defaults?.set(false, forKey: "keyboardRewriteInProgress")
-                        defaults?.synchronize()
-                        if showExpl {
-                            let text = result.explanation.isEmpty
-                                ? "Rewritten at \(level) level for \(keyboardMode.rawValue) / \(profile)."
-                                : result.explanation
-                            withAnimation { explanation = text }
+                    } else {
+                        if showExpl && !result.explanation.isEmpty {
+                            explanation = result.explanation
                         }
                         incrementMetric("keyboard.\(keyboardMode.rawValue.lowercased()).rewrite.success")
-                        showStatus("Rewritten ✓")
+                        showStatus("Review and tap Insert")
                         saveLog(original: full, result: result)
                     }
                 }
@@ -607,6 +642,28 @@ struct KeyboardView: View {
                     defaults?.synchronize()
                     showStatus(error.localizedDescription)
                 }
+            }
+        }
+    }
+
+    private func applyPreview() {
+        guard !previewText.isEmpty else { return }
+        let text = previewText
+        let deleteCount = pendingDeleteCount
+        defaults?.set(true, forKey: "keyboardRewriteInProgress")
+        defaults?.synchronize()
+        Task {
+            await deleteBackwardChunked(proxy: inputVC.textDocumentProxy, count: deleteCount)
+            await insertTextChunked(proxy: inputVC.textDocumentProxy, text: text)
+            await MainActor.run {
+                keyboardTypedText = text
+                defaults?.set(text, forKey: "testBoxFullText")
+                defaults?.set(false, forKey: "keyboardRewriteInProgress")
+                defaults?.synchronize()
+                previewText = ""
+                pendingDeleteCount = 0
+                showSpiral = false
+                showStatus("Applied ✓")
             }
         }
     }
@@ -646,26 +703,8 @@ struct KeyboardView: View {
     }
 
     private func applySpiral(_ text: String) {
-        let proxy = inputVC.textDocumentProxy
-        let before = proxy.documentContextBeforeInput ?? ""
-        let deleteCount = spiralOriginalCount > 0 ? spiralOriginalCount : before.count
-        defaults?.set(true, forKey: "keyboardRewriteInProgress")
-        defaults?.synchronize()
-        Task {
-            await moveCursorToEnd(proxy: proxy, knownTextCount: deleteCount)
-            await deleteBackwardChunked(proxy: proxy, count: deleteCount)
-            await insertTextChunked(proxy: proxy, text: text)
-            await MainActor.run {
-                keyboardTypedText = text
-                defaults?.set(text, forKey: "testBoxFullText")
-                defaults?.set(false, forKey: "keyboardRewriteInProgress")
-                defaults?.synchronize()
-                spiralOriginal = ""
-                spiralOriginalCount = 0
-                withAnimation { showSpiral = false }
-                showStatus("Applied ✓")
-            }
-        }
+        previewText = text
+        showSpiral = false
     }
 
     private func showStatus(_ msg: String) {
@@ -780,7 +819,7 @@ struct KeyboardView: View {
         case "Shorter": styleInstruction = "Make the rewrite shorter. Remove repetition and extra context while preserving the actual point."
         case "Warmer": styleInstruction = "Make the rewrite warmer and more socially soft, without becoming fake or over-apologetic."
         case "Direct": styleInstruction = "Make the rewrite more direct, clear, and action-oriented without sounding harsh."
-        case "Clarify": styleInstruction = "Make the message clearer, easier to read, and closer to the user’s intended meaning."
+        case "Clarify": styleInstruction = "Make the message clearer, easier to read, and closer to the user's intended meaning."
         default: styleInstruction = "Make a balanced clear rewrite."
         }
         if keyboardMode == .clarity {
@@ -804,7 +843,7 @@ struct KeyboardView: View {
             """
         }
         return """
-        You are ToneLayer, a communication assistant that translates ND communication into NT-readable communication for a \(profile) user. Direction: ND-to-NT. \(instruction) \(styleInstruction)\(adaptive)
+        You are ToneLayer, a communication assistant that helps neurodivergent people be understood by neurotypical readers. Your job is to translate the structure and signals of ND communication — not to delete the person's voice, meaning, or emotional content. Direction: ND-to-NT. Profile: \(profile). \(instruction) \(styleInstruction)\(adaptive)
 
         Rewrite the entire text the user provided from ND style into NT style. Do not stop halfway, do not summarize only the beginning, and do not omit later points just because the text is long or messy. Preserve the user's intended message, requests, constraints, and necessary context from the whole original, but translate the structure, order, tone, and phrasing into what an NT reader would naturally expect.
 
@@ -842,7 +881,7 @@ struct KeyboardView: View {
             case "Medium":
                 return "Restructure from ND flow into NT readability. Move the main point to the first sentence. Group related ideas into short paragraphs — each paragraph covers one topic. Cut obvious repetition but keep all distinct ideas and the user's voice intact. The rewrite MUST have multiple paragraphs separated by blank lines. NT readers should be able to follow without effort."
             default: // Strong
-                return "Make a strong ND-to-NT rewrite for ADHD communication. This should read almost like a clear, practical NT message: concise, direct, organized, emotionally regulated, and low-friction for the reader. First sentence states the purpose. Remove spirals, side quests, metaphors, repeated urgency, internal noise, and process-heavy explanation. Keep only the necessary meaning, request, constraints, and useful context. If the text is asking for help, name the actual support need in one clean sentence."
+                return "Reorganize and signal this content clearly for NT readers while keeping the user's voice and meaning fully intact. Lead with what the person needs, is asking, or is communicating. Break into clear paragraphs. Keep the emotional content and the connections between ideas — sequence them so they read as deliberate rather than scattered. Do not strip the person's voice, delete their concerns, or flatten the emotional texture. If the text asks for help or describes a struggle, name it clearly in the first paragraph — then context and detail follow. This is translation, not deletion."
             }
 
         case "Autism":
@@ -882,7 +921,7 @@ struct KeyboardView: View {
             case "Medium":
                 return "Make a medium ND-to-NT rewrite. Lead with the main point. Cut the worst tangents. Remove defensive over-explanation. Calmer and more focused."
             default: // Strong
-                return "Make a strong ND-to-NT rewrite for PTSD + ADHD communication. This should be concise, calm, direct, and almost businesslike. Lead with the point. Remove spirals, defensive language, repeated urgency, over-explanation, and internal processing. Keep the valid need and any necessary context. If the text is asking for help, name the support need in one clean sentence."
+                return "Reorganize and signal this content clearly for NT readers while keeping the user's voice and meaning intact. Lead with the main point or need. Keep emotional content — sequence it so it reads as deliberate rather than scattered. Remove defensive language and over-explanation. Calm, organized, and still recognizably the person who wrote it."
             }
 
         case "Mixed / Not Sure", "Mixed":
