@@ -167,7 +167,7 @@ struct ContentView: View {
 
             HStack(spacing: 10) {
                 statusPill(label: "Mode", value: "Clarity")
-                statusPill(label: "Direction", value: "NT -> ND")
+                statusPill(label: "Direction", value: "NT \u{2192} ND")
                 statusPill(label: "Live AI", value: aiConsent && !apiKey.isEmpty ? "On" : "Local")
             }
         }
@@ -177,17 +177,19 @@ struct ContentView: View {
     }
 
     private func statusPill(label: String, value: String) -> some View {
-        HStack {
+        VStack(spacing: 2) {
             Text(label)
-                .font(.caption)
+                .font(.caption2)
                 .foregroundStyle(.secondary)
-            Spacer()
+                .lineLimit(1)
             Text(value)
                 .font(.caption.weight(.bold))
                 .foregroundStyle(Color.clarityGreen)
+                .lineLimit(1)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
         .background(Color.clarityGreenSoft)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
@@ -280,7 +282,7 @@ struct ContentView: View {
                     } else {
                         Image(systemName: "wand.and.stars")
                     }
-                    Text(isRewriting ? "Tuning…" : "Clarify")
+                    Text(isRewriting ? "Tuning\u{2026}" : "Rewrite")
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
@@ -484,7 +486,6 @@ struct ContentView: View {
         .glassCard(tint: .appNeutral, cornerRadius: 18)
     }
 
-
     private var messageLengthNotice: some View {
         let words = draft.trimmingCharacters(in: .whitespacesAndNewlines)
             .split { $0.isWhitespace || $0.isNewline }
@@ -523,7 +524,7 @@ struct ContentView: View {
 
     private var resultWindowText: String {
         if selectedResult == "Original" { return draft.isEmpty ? "Your original message will show here." : draft }
-        guard hasOutput else { return "Tap Clarify to see the rewritten version here." }
+        guard hasOutput else { return "Tap Rewrite to see the rewritten version here." }
         let text = selectedResultText
         return text.isEmpty ? "Nothing to show for this tab yet." : text
     }
@@ -536,22 +537,11 @@ struct ContentView: View {
             return "After a rewrite, this explains how the message may land and why the wording changed."
         }
         var parts: [String] = []
-        if !teachingExplanation.isEmpty {
-            parts.append(teachingExplanation)
-        }
-        if !interpretationRisk.isEmpty {
-            parts.append("How this may sound:\n\(interpretationRisk)")
-        }
-        if !changeNotes.isEmpty {
-            parts.append("What changed:\n\(changeNotes)")
-        }
-        if !learningTakeaway.isEmpty {
-            parts.append("Learn:\n\(learningTakeaway)")
-        }
-        if !parts.isEmpty {
-            return parts.joined(separator: "\n\n")
-        }
-        return "No teaching note returned for this rewrite."
+        if !teachingExplanation.isEmpty { parts.append(teachingExplanation) }
+        if !interpretationRisk.isEmpty  { parts.append("How this may sound:\n\(interpretationRisk)") }
+        if !changeNotes.isEmpty         { parts.append("What changed:\n\(changeNotes)") }
+        if !learningTakeaway.isEmpty    { parts.append("Learn:\n\(learningTakeaway)") }
+        return parts.isEmpty ? "No teaching note returned for this rewrite." : parts.joined(separator: "\n\n")
     }
 
     private func pasteFromClipboard() {
@@ -579,10 +569,8 @@ struct ContentView: View {
 
     private func normalizedKeyboardProfile(_ lens: String) -> String {
         switch lens {
-        case "General ND", "Mixed":
-            return "Mixed / Not Sure"
-        default:
-            return lens
+        case "General ND", "Mixed": return "Mixed / Not Sure"
+        default: return lens
         }
     }
 
@@ -708,18 +696,15 @@ struct ContentView: View {
         else {
             return ClarityResult(
                 clearerVersion: cleaned.trimmingCharacters(in: .whitespacesAndNewlines),
-                interpretationRisk: "",
-                changeNotes: "",
-                learningTakeaway: "",
-                teachingExplanation: ""
+                interpretationRisk: "", changeNotes: "", learningTakeaway: "", teachingExplanation: ""
             )
         }
 
         return ClarityResult(
-            clearerVersion: parsed["clearer_version"] as? String ?? "",
+            clearerVersion:    parsed["clearer_version"]     as? String ?? "",
             interpretationRisk: parsed["interpretation_risk"] as? String ?? "",
-            changeNotes: parsed["change_notes"] as? String ?? "",
-            learningTakeaway: parsed["learning_takeaway"] as? String ?? "",
+            changeNotes:       parsed["change_notes"]        as? String ?? "",
+            learningTakeaway:  parsed["learning_takeaway"]   as? String ?? "",
             teachingExplanation: parsed["teaching_explanation"] as? String
                 ?? parsed["explanation"] as? String
                 ?? ""
@@ -738,17 +723,17 @@ struct ContentView: View {
 
         General ND: remove ambiguity, make the ask explicit, add necessary context, state urgency, and give a concrete next step.
         ADHD: reduce working-memory load, make priority and next action obvious, avoid buried asks and long multi-step wording.
-        Autism: make meaning literal, remove social subtext, state expectations directly, avoid vague phrases like “soon”, “later”, “we should talk”, or “whatever works” unless defined.
+        Autism: make meaning literal, remove social subtext, state expectations directly, avoid vague phrases like \"soon\", \"later\", \"we should talk\", or \"whatever works\" unless defined.
         PTSD / CPTSD: reduce threat signals, add reassurance when appropriate, avoid vague warnings, criticism without context, or power-heavy phrasing.
         Mixed: assume overlapping ADHD, autistic, PTSD/CPTSD, and anxiety-related communication needs. Make the main point obvious first. Reduce working-memory load. Make implied meaning explicit. Remove vague timing or social hints. Lower threat signals and defensive wording. Include reassurance when appropriate. End with one clear next step.
 
         Always respond with ONLY valid JSON:
         {
-          "clearer_version": "the rewritten message the sender can use",
-          "teaching_explanation": "REQUIRED: plain-language explanation of how the original wording may land to the reader and why the rewrite improves clarity",
-          "interpretation_risk": "brief explanation of what the sender may sound like to an ND person and why it may be confusing, threatening, vague, or hard to act on",
-          "change_notes": "brief explanation of what changed and why",
-          "learning_takeaway": "one reusable rule the NT sender can remember next time, written plainly"
+          \"clearer_version\": \"the rewritten message the sender can use\",
+          \"teaching_explanation\": \"REQUIRED: plain-language explanation of how the original wording may land to the reader and why the rewrite improves clarity\",
+          \"interpretation_risk\": \"brief explanation of what the sender may sound like to an ND person and why it may be confusing, threatening, vague, or hard to act on\",
+          \"change_notes\": \"brief explanation of what changed and why\",
+          \"learning_takeaway\": \"one reusable rule the NT sender can remember next time, written plainly\"
         }
         """
     }
@@ -756,12 +741,8 @@ struct ContentView: View {
     private func extractJSON(from raw: String) -> String {
         var s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         if s.hasPrefix("```") {
-            if let firstNL = s.firstIndex(of: "\n") {
-                s = String(s[s.index(after: firstNL)...])
-            }
-            if s.hasSuffix("```") {
-                s = String(s.dropLast(3)).trimmingCharacters(in: .whitespacesAndNewlines)
-            }
+            if let firstNL = s.firstIndex(of: "\n") { s = String(s[s.index(after: firstNL)...]) }
+            if s.hasSuffix("```") { s = String(s.dropLast(3)).trimmingCharacters(in: .whitespacesAndNewlines) }
         }
         if let openIdx = s.firstIndex(of: "{"),
            let closeIdx = s.lastIndex(of: "}"),
@@ -775,10 +756,7 @@ struct ContentView: View {
         let encodedBody = clearerVersion.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         guard let url = URL(string: "mailto:?body=\(encodedBody)") else { return }
         UIApplication.shared.open(url) { success in
-            if !success {
-                UIPasteboard.general.string = clearerVersion
-                status = "Email unavailable. Copied instead."
-            }
+            if !success { UIPasteboard.general.string = clearerVersion; status = "Email unavailable. Copied instead." }
         }
     }
 
@@ -786,16 +764,12 @@ struct ContentView: View {
         let encodedBody = clearerVersion.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         guard let url = URL(string: "sms:&body=\(encodedBody)") else { return }
         UIApplication.shared.open(url) { success in
-            if !success {
-                UIPasteboard.general.string = clearerVersion
-                status = "Messages unavailable. Copied instead."
-            }
+            if !success { UIPasteboard.general.string = clearerVersion; status = "Messages unavailable. Copied instead." }
         }
     }
 
     private func exportTextFile(label: String) {
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("ND-Clarity-\(label).txt")
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("ND-Clarity-\(label).txt")
         do {
             try clearerVersion.write(to: url, atomically: true, encoding: .utf8)
             exportURL = url
@@ -825,11 +799,9 @@ enum ClarityError: LocalizedError {
 
 struct ActivityView: UIViewControllerRepresentable {
     let activityItems: [Any]
-
     func makeUIViewController(context: Context) -> UIActivityViewController {
         UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
     }
-
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
@@ -851,9 +823,7 @@ struct UIKitTextView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UITextView, context: Context) {
-        if uiView.text != text {
-            uiView.text = text
-        }
+        if uiView.text != text { uiView.text = text }
     }
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
@@ -861,10 +831,7 @@ struct UIKitTextView: UIViewRepresentable {
     class Coordinator: NSObject, UITextViewDelegate {
         var parent: UIKitTextView
         init(_ parent: UIKitTextView) { self.parent = parent }
-
-        func textViewDidChange(_ textView: UITextView) {
-            parent.text = textView.text
-        }
+        func textViewDidChange(_ textView: UITextView) { parent.text = textView.text }
     }
 }
 
