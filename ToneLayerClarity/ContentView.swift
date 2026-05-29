@@ -63,7 +63,7 @@ struct ContentView: View {
     @State private var changeNotes = ""
     @State private var learningTakeaway = ""
     @State private var teachingExplanation = ""
-    @State private var selectedResult = "Fix"
+    @State private var selectedResult = "Rewrite"
     @State private var showingOptions = false
     @State private var showTeaching = true
     @State private var aiConsent = false
@@ -78,7 +78,7 @@ struct ContentView: View {
     private var sharedDefaults: UserDefaults? { UserDefaults(suiteName: appGroupID) }
     private let lenses = ["General ND", "ADHD", "Autism", "PTSD / CPTSD", "Mixed"]
     private let goals = ["Make clearer", "Reduce anxiety", "Make actionable"]
-    private let resultTabs = ["Fix", "Tone", "Why", "Tip"]
+    private let resultTabs = ["Original", "Rewrite", "Tone", "Why", "Tip"]
     private let dailyTips: [(title: String, body: String)] = [
         (
             "A blocked call may not feel neutral",
@@ -297,34 +297,33 @@ struct ContentView: View {
                     .foregroundStyle(.secondary)
             }
 
-            if showTeaching {
-                Picker("Result", selection: $selectedResult) {
-                    ForEach(resultTabs, id: \.self) { Text($0).font(.caption).lineLimit(1).minimumScaleFactor(0.85).tag($0) }
+            HStack(spacing: 6) {
+                ForEach(resultTabs, id: \.self) { tab in
+                    Button { selectedResult = tab } label: {
+                        Text(tab)
+                            .font(.caption.weight(selectedResult == tab ? .bold : .semibold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(selectedResult == tab ? Color.clarityGreen : Color(.tertiarySystemBackground))
+                            .foregroundStyle(selectedResult == tab ? Color.white : Color.primary)
+                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
                 }
-                .pickerStyle(.segmented)
             }
 
-            Text(resultWindowText)
-                .font(.body)
-                        .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
-                .frame(maxWidth: .infinity, minHeight: 120, alignment: .topLeading)
-                .padding(14)
-                        .background(Color.clarityGreenSoft.opacity(0.95))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                .textSelection(.enabled)
-
-            VStack(alignment: .leading, spacing: 8) {
-                Label("Why", systemImage: "lightbulb")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.clarityGreen)
-                Text(teachingWindowText)
-                    .font(.subheadline)
-                        .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
+            ScrollView {
+                Text(resultWindowText)
+                    .font(.body)
+                    .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .padding(14)
                     .textSelection(.enabled)
             }
-            .frame(maxWidth: .infinity, minHeight: 90, alignment: .topLeading)
-            .padding(14)
-            .background(Color.brandGreenMist)
+            .frame(minHeight: 220, maxHeight: 400)
+            .background(Color.clarityGreenSoft.opacity(0.95))
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
             if hasOutput {
@@ -436,7 +435,7 @@ struct ContentView: View {
                         .onChange(of: showTeaching) { _, newValue in
                             UserDefaults.standard.set(newValue, forKey: showTeachingKey)
                             syncKeyboardSettings()
-                            if !newValue { selectedResult = "Fix" }
+                            if !newValue { selectedResult = "Rewrite" }
                         }
                 }
 
@@ -493,7 +492,7 @@ struct ContentView: View {
         let chars = draft.count
         let isLong = chars >= 700 || words >= 120
         return VStack(alignment: .leading, spacing: 6) {
-            Text("\(chars) chars • \(words) words")
+            Text("\(chars) chars \u{2022} \(words) words")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             if isLong {
@@ -514,18 +513,19 @@ struct ContentView: View {
 
     private var selectedResultText: String {
         switch selectedResult {
+        case "Original": return draft
         case "Tone": return interpretationRisk
-        case "Why": return changeNotes
+        case "Why": return teachingWindowText
         case "Tip": return learningTakeaway
         default: return clearerVersion
         }
     }
 
     private var resultWindowText: String {
-        guard hasOutput else {
-            return "Your clearer version will appear here."
-        }
-        return selectedResultText.isEmpty ? "Your clearer version will appear here." : selectedResultText
+        if selectedResult == "Original" { return draft.isEmpty ? "Your original message will show here." : draft }
+        guard hasOutput else { return "Tap Clarify to see the rewritten version here." }
+        let text = selectedResultText
+        return text.isEmpty ? "Nothing to show for this tab yet." : text
     }
 
     private var teachingWindowText: String {
@@ -640,7 +640,7 @@ struct ContentView: View {
             incrementMetric("longMessage.flagged")
         }
         status = "Checking message..."
-        selectedResult = "Fix"
+        selectedResult = "Rewrite"
 
         Task {
             do {
@@ -738,7 +738,7 @@ struct ContentView: View {
 
         General ND: remove ambiguity, make the ask explicit, add necessary context, state urgency, and give a concrete next step.
         ADHD: reduce working-memory load, make priority and next action obvious, avoid buried asks and long multi-step wording.
-        Autism: make meaning literal, remove social subtext, state expectations directly, avoid vague phrases like "soon", "later", "we should talk", or "whatever works" unless defined.
+        Autism: make meaning literal, remove social subtext, state expectations directly, avoid vague phrases like “soon”, “later”, “we should talk”, or “whatever works” unless defined.
         PTSD / CPTSD: reduce threat signals, add reassurance when appropriate, avoid vague warnings, criticism without context, or power-heavy phrasing.
         Mixed: assume overlapping ADHD, autistic, PTSD/CPTSD, and anxiety-related communication needs. Make the main point obvious first. Reduce working-memory load. Make implied meaning explicit. Remove vague timing or social hints. Lower threat signals and defensive wording. Include reassurance when appropriate. End with one clear next step.
 
