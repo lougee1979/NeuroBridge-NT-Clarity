@@ -261,6 +261,7 @@ struct KeyboardView: View {
             rewriteChip("Brief", systemImage: nil) { rewrite(style: "Shorter") }
             rewriteChip("Soften", systemImage: nil) { rewrite(style: "Warmer") }
             rewriteChip("Direct", systemImage: nil) { rewrite(style: "Direct") }
+            rewriteChip("Paste", systemImage: "doc.on.clipboard") { pasteClipboard() }
         }
     }
 
@@ -600,7 +601,7 @@ struct KeyboardView: View {
         if full.count >= 700 || full.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count >= 120 {
             incrementMetric("keyboard.longMessage.flagged")
         }
-        showStatus("Sending \(full.count) chars…")
+        showStatus("Sending \(full.count) chars\u{2026}")
         isRewriting = true
         previewText = ""
         pendingDeleteCount = 0
@@ -663,9 +664,19 @@ struct KeyboardView: View {
                 previewText = ""
                 pendingDeleteCount = 0
                 showSpiral = false
-                showStatus("Applied ✓")
+                showStatus("Applied \u{2713}")
             }
         }
+    }
+
+    private func pasteClipboard() {
+        guard let text = UIPasteboard.general.string, !text.isEmpty else {
+            showStatus("Clipboard is empty")
+            return
+        }
+        keyboardTypedText = text
+        inputVC.textDocumentProxy.insertText(text)
+        showStatus("Pasted \u{2014} tap Clarify to rewrite")
     }
 
     private func deleteBackwardChunked(proxy: UITextDocumentProxy, count: Int) async {
@@ -677,7 +688,7 @@ struct KeyboardView: View {
                 for _ in 0..<thisChunk { proxy.deleteBackward() }
             }
             remaining -= thisChunk
-            try? await Task.sleep(nanoseconds: 5_000_000) // 5ms
+            try? await Task.sleep(nanoseconds: 5_000_000)
         }
     }
 
@@ -685,7 +696,7 @@ struct KeyboardView: View {
         await MainActor.run {
             proxy.adjustTextPosition(byCharacterOffset: knownTextCount)
         }
-        try? await Task.sleep(nanoseconds: 20_000_000) // 20ms
+        try? await Task.sleep(nanoseconds: 20_000_000)
     }
 
     private func insertTextChunked(proxy: UITextDocumentProxy, text: String) async {
@@ -698,7 +709,7 @@ struct KeyboardView: View {
                 proxy.insertText(chunk)
             }
             index = next
-            try? await Task.sleep(nanoseconds: 5_000_000) // 5ms
+            try? await Task.sleep(nanoseconds: 5_000_000)
         }
     }
 
@@ -746,7 +757,6 @@ struct KeyboardView: View {
         let (data, response) = try await URLSession.shared.data(for: req)
         guard let http = response as? HTTPURLResponse else { throw NBError.apiFailed(0) }
         if http.statusCode != 200 {
-            // Try to surface Claude's error message so user sees the real problem
             if let errJSON = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let err = errJSON["error"] as? [String: Any],
                let msg = err["message"] as? String {
@@ -758,11 +768,9 @@ struct KeyboardView: View {
               let content = (json["content"] as? [[String: Any]])?.first?["text"] as? String
         else { throw NBError.badResponse }
 
-        // Try to parse JSON from Claude's response — strip markdown fences if present
         let cleaned = extractJSON(from: content)
         if let d = cleaned.data(using: .utf8),
            let parsed = try? JSONSerialization.jsonObject(with: d) as? [String: Any] {
-            // Prefer paragraphs array (avoids JSON \n\n escaping issues); fall back to rewrite string
             let rewrite: String
             if let paras = parsed["paragraphs"] as? [String], !paras.isEmpty {
                 rewrite = paras.joined(separator: "\n\n")
@@ -780,18 +788,14 @@ struct KeyboardView: View {
                 )
             }
         }
-        // Fallback: use plain content — but strip any obvious JSON noise
         return ClaudeResult(
             rewrite: cleaned.trimmingCharacters(in: .whitespacesAndNewlines),
             explanation: "", distortions: [], grammarOnly: ""
         )
     }
 
-    /// Extracts JSON from a response that may be wrapped in ```json ... ``` or have
-    /// extra text before/after. Returns the inner JSON object string, or the input unchanged.
     private func extractJSON(from raw: String) -> String {
         var s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Strip markdown fences
         if s.hasPrefix("```") {
             if let firstNL = s.firstIndex(of: "\n") {
                 s = String(s[s.index(after: firstNL)...])
@@ -800,7 +804,6 @@ struct KeyboardView: View {
                 s = String(s.dropLast(3)).trimmingCharacters(in: .whitespacesAndNewlines)
             }
         }
-        // If there's still extra text, grab the first { ... } block
         if let openIdx = s.firstIndex(of: "{"),
            let closeIdx = s.lastIndex(of: "}"),
            openIdx < closeIdx {
@@ -828,7 +831,7 @@ struct KeyboardView: View {
 
             Rewrite the entire text so it is explicit, concrete, low-threat, and easy for a neurodivergent reader to parse. Identify hidden assumptions, vague phrasing, unclear urgency, implied expectations, accidental threat signals, and missing next steps. Do not diagnose the reader. Do not shame the sender. Preserve the sender's intended meaning while making the topic, timing, tone, and requested action clear.
 
-            The "paragraphs" rewrite is the primary output. Do not shorten, flatten, or simplify the main rewrite to make room for grammar_only. Generate grammar_only after the main rewrite, and keep it secondary.
+            The "paragraphs" rewrite is the primary output. Do not shorten, flatten, or simplify the main rewrite to make room for grammar_only. Generate grammar_only after the main rewrite, and keep it secondary. For any text longer than 3 sentences, you MUST return at least 2 paragraphs in the array — never collapse everything into a single string. Brain dumps and multi-topic text must always be organized into multiple paragraphs.
 
             This is a teaching tool. The explanation must teach how the original NT wording may land to an ND reader and why the rewrite is easier to understand.
 
@@ -847,7 +850,7 @@ struct KeyboardView: View {
 
         Rewrite the entire text the user provided from ND style into NT style. Do not stop halfway, do not summarize only the beginning, and do not omit later points just because the text is long or messy. Preserve the user's intended message, requests, constraints, and necessary context from the whole original, but translate the structure, order, tone, and phrasing into what an NT reader would naturally expect.
 
-        The "paragraphs" rewrite is the primary output. Do not shorten, flatten, or simplify the main rewrite to make room for grammar_only. Generate grammar_only after the main rewrite, and keep it secondary.
+        The "paragraphs" rewrite is the primary output. Do not shorten, flatten, or simplify the main rewrite to make room for grammar_only. Generate grammar_only after the main rewrite, and keep it secondary. For any text longer than 3 sentences, you MUST return at least 2 paragraphs in the array — never collapse everything into a single string. Brain dumps and multi-topic text must always be organized into multiple paragraphs.
 
         This is a teaching tool. The explanation must teach — don't just say what changed, say WHY that change makes the text land better with NT readers. Help the user recognise their own patterns over time.
 
@@ -865,7 +868,7 @@ struct KeyboardView: View {
     private func adaptiveContext() -> String {
         let patterns = LogStore.shared.topPatterns()
         guard !patterns.isEmpty else { return "" }
-        let list = patterns.map { "\($0.pattern) (\($0.count)×)" }.joined(separator: ", ")
+        let list = patterns.map { "\($0.pattern) (\($0.count)\u{d7})" }.joined(separator: ", ")
         return "\n\nThis user's recurring patterns: \(list). Be especially attentive to these."
     }
 
@@ -881,7 +884,7 @@ struct KeyboardView: View {
             case "Medium":
                 return "Restructure from ND flow into NT readability. Move the main point to the first sentence. Group related ideas into short paragraphs — each paragraph covers one topic. Cut obvious repetition but keep all distinct ideas and the user's voice intact. The rewrite MUST have multiple paragraphs separated by blank lines. NT readers should be able to follow without effort."
             default: // Strong
-                return "Reorganize and signal this content clearly for NT readers while keeping the user's voice and meaning fully intact. Lead with what the person needs, is asking, or is communicating. Break into clear paragraphs. Keep the emotional content and the connections between ideas — sequence them so they read as deliberate rather than scattered. Do not strip the person's voice, delete their concerns, or flatten the emotional texture. If the text asks for help or describes a struggle, name it clearly in the first paragraph — then context and detail follow. This is translation, not deletion."
+                return "Reorganize and signal this content clearly for NT readers while keeping the user's voice and meaning fully intact. Lead with what the person needs, is asking, or is communicating. Break into clear paragraphs — each covering one idea or thread. Keep the emotional content and the connections between ideas — sequence them so they read as deliberate rather than scattered. Do not strip the person's voice, delete their concerns, or flatten the emotional texture. If the text asks for help or describes a struggle, name it clearly in the first paragraph — then context and detail follow in subsequent paragraphs. This is translation, not deletion. The output MUST be multiple paragraphs."
             }
 
         case "Autism":
@@ -889,9 +892,9 @@ struct KeyboardView: View {
             case "Light":
                 return "Make a light ND-to-NT rewrite. Fix typos. Add a brief greeting or sign-off only if completely absent. Keep all content and voice intact."
             case "Medium":
-                return "Make a medium ND-to-NT rewrite. Add appropriate social warmth — a genuine greeting, warm transitions, polite closing. Decode any implied meaning and state it directly. Keep all literal content. NT readers should feel connected, not just informed."
+                return "Make a medium ND-to-NT rewrite. Add appropriate social warmth — a genuine greeting, warm transitions, polite closing. Decode any implied meaning and state it directly. Keep all literal content. NT readers should feel connected, not just informed. Use multiple paragraphs to separate distinct topics or points."
             default: // Strong
-                return "Make a strong ND-to-NT rewrite using NT social norms. Add natural social flow — appropriate opening, warmth throughout, clear closing. Remove overly blunt phrasing where it would land poorly. Preserve all the user's meaning. Should read as something an NT person would naturally write to build or maintain a relationship."
+                return "Make a strong ND-to-NT rewrite using NT social norms. Add natural social flow — appropriate opening, warmth throughout, clear closing. Remove overly blunt phrasing where it would land poorly. Preserve all the user's meaning. Break into multiple paragraphs — each one covering one idea. Should read as something an NT person would naturally write to build or maintain a relationship."
             }
 
         case "PTSD / CPTSD":
@@ -899,9 +902,9 @@ struct KeyboardView: View {
             case "Light":
                 return "Make a light ND-to-NT rewrite. Soften the most reactive or escalating phrases only. Keep all content and the user's voice intact."
             case "Medium":
-                return "Make a medium ND-to-NT rewrite. Remove over-justification, excessive apology, and defensive language. Rewrite hedging sentences to be direct. Calm tone throughout. NT readers should feel a steady, confident person wrote this."
+                return "Make a medium ND-to-NT rewrite. Remove over-justification, excessive apology, and defensive language. Rewrite hedging sentences to be direct. Calm tone throughout. Use multiple paragraphs to organize the content. NT readers should feel a steady, confident person wrote this."
             default: // Strong
-                return "Make a strong ND-to-NT rewrite into calm, grounded communication. Remove all defensive language, over-explanation, and anticipatory apology. Write with quiet confidence — what a calm, clear-headed NT person would write with the same message. No escalating language, no hedging."
+                return "Make a strong ND-to-NT rewrite into calm, grounded communication. Remove all defensive language, over-explanation, and anticipatory apology. Break into multiple paragraphs — each one making a clear, direct point. Write with quiet confidence — what a calm, clear-headed NT person would write with the same message. No escalating language, no hedging."
             }
 
         case "Autism + PTSD", "PTSD + Autism":
@@ -909,9 +912,9 @@ struct KeyboardView: View {
             case "Light":
                 return "Make a light ND-to-NT rewrite. Soften the most reactive phrases and add a greeting if absent. Minimal changes otherwise."
             case "Medium":
-                return "Make a medium ND-to-NT rewrite. Remove over-justification and add social warmth. Direct but kind. Cut defensive hedging while adding genuine warmth and connection."
+                return "Make a medium ND-to-NT rewrite. Remove over-justification and add social warmth. Direct but kind. Cut defensive hedging while adding genuine warmth and connection. Use multiple paragraphs to separate distinct topics."
             default: // Strong
-                return "Make a strong ND-to-NT rewrite: warm, direct, calm, no over-justification, no idioms. What a warm, grounded NT person would write with the same message."
+                return "Make a strong ND-to-NT rewrite: warm, direct, calm, no over-justification, no idioms. Break into multiple paragraphs — one idea per paragraph. What a warm, grounded NT person would write with the same message."
             }
 
         case "ADHD + PTSD", "PTSD + ADHD":
@@ -919,9 +922,9 @@ struct KeyboardView: View {
             case "Light":
                 return "Make a light ND-to-NT rewrite. Soften the most reactive phrasing and move the main point closer to the start if buried. Minimal changes otherwise."
             case "Medium":
-                return "Make a medium ND-to-NT rewrite. Lead with the main point. Cut the worst tangents. Remove defensive over-explanation. Calmer and more focused."
+                return "Make a medium ND-to-NT rewrite. Lead with the main point. Cut the worst tangents. Remove defensive over-explanation. Use multiple paragraphs to organize the message. Calmer and more focused."
             default: // Strong
-                return "Reorganize and signal this content clearly for NT readers while keeping the user's voice and meaning intact. Lead with the main point or need. Keep emotional content — sequence it so it reads as deliberate rather than scattered. Remove defensive language and over-explanation. Calm, organized, and still recognizably the person who wrote it."
+                return "Reorganize and signal this content clearly for NT readers while keeping the user's voice and meaning intact. Lead with the main point or need. Break into multiple paragraphs — each one organized around one topic or thread. Keep emotional content — sequence it so it reads as deliberate rather than scattered. Remove defensive language and over-explanation. Calm, organized, and still recognizably the person who wrote it. Output MUST be multiple paragraphs."
             }
 
         case "Mixed / Not Sure", "Mixed":
@@ -929,16 +932,16 @@ struct KeyboardView: View {
             case "Light":
                 return "Make a light mixed-needs rewrite. Keep the user's voice, but move the main point earlier, define vague timing, and reduce the most confusing or emotionally loaded phrasing."
             case "Medium":
-                return "Make a mixed-needs rewrite for overlapping ADHD, autistic, PTSD/CPTSD, and anxiety-related communication needs. Put the main point first. Reduce working-memory load. Make implied meaning explicit. Lower threat signals. Define timing and expectations. End with one clear next step."
+                return "Make a mixed-needs rewrite for overlapping ADHD, autistic, PTSD/CPTSD, and anxiety-related communication needs. Put the main point first. Reduce working-memory load. Make implied meaning explicit. Lower threat signals. Define timing and expectations. Break into multiple paragraphs. End with one clear next step."
             default:
-                return "Make a strong mixed-needs rewrite. This should be concise, explicit, calm, low-threat, easy to act on, and socially clear. Remove side quests, buried asks, vague hints, defensive wording, repeated urgency, and unclear timing. Preserve the user's meaning and end with one obvious next step."
+                return "Make a strong mixed-needs rewrite. This should be concise, explicit, calm, low-threat, easy to act on, and socially clear. Break into multiple paragraphs — each covering one topic or ask. Remove buried asks, vague hints, defensive wording, and unclear timing. Preserve the user's meaning and end with one obvious next step."
             }
 
         default:
             switch level {
             case "Light":  return "Make a light ND-to-NT rewrite. Fix typos and grammar only. Keep all content and voice intact."
-            case "Medium": return "Restructure ND communication into NT-readable clarity. Main point first. Cut obvious repetition. Keep the user's voice and all distinct substance."
-            default:       return "Fully translate ND communication for NT readers. Clear, direct, no unnecessary content. What an NT person would naturally write with the same intent, while preserving the whole message."
+            case "Medium": return "Restructure ND communication into NT-readable clarity. Main point first. Cut obvious repetition. Use multiple paragraphs. Keep the user's voice and all distinct substance."
+            default:       return "Fully translate ND communication for NT readers. Clear, direct, organized into multiple paragraphs. What an NT person would naturally write with the same intent, while preserving the whole message."
             }
         }
     }
@@ -967,9 +970,9 @@ struct KeyboardView: View {
         case "Light":
             intensityInstruction = "Make minimal Clarity changes. Keep the sender's voice, but define vague timing, add missing context, and make any hidden ask explicit."
         case "Medium":
-            intensityInstruction = "Make a medium Clarity rewrite. Put the topic and intent first, name urgency, remove social hints, add reassurance if useful, and end with the requested action."
+            intensityInstruction = "Make a medium Clarity rewrite. Put the topic and intent first, name urgency, remove social hints, add reassurance if useful, and end with the requested action. Use multiple paragraphs to separate distinct points."
         default:
-            intensityInstruction = "Make a strong Clarity rewrite. Fully translate indirect NT wording into explicit, calm, concrete ND-accessible wording with low threat, clear expectations, defined timing, and one obvious next step."
+            intensityInstruction = "Make a strong Clarity rewrite. Fully translate indirect NT wording into explicit, calm, concrete ND-accessible wording with low threat, clear expectations, defined timing, and one obvious next step. Break into multiple paragraphs — one idea per paragraph."
         }
 
         return "\(profileInstruction) \(intensityInstruction)"
