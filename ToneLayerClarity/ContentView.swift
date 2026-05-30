@@ -11,20 +11,21 @@ import SwiftUI
 import UIKit
 
 extension Color {
-    static let toneLayerBlue = Color(red: 0.145, green: 0.388, blue: 0.922)
+    static let toneLayerBlue     = Color(red: 0.145, green: 0.388, blue: 0.922)
     static let toneLayerBlueSoft = Color(red: 0.859, green: 0.918, blue: 0.996)
-    static let clarityGreen = Color(red: 0.020, green: 0.588, blue: 0.412)
-    static let clarityGreenSoft = Color(red: 0.820, green: 0.980, blue: 0.898)
-    static let appNeutral = Color(red: 0.322, green: 0.322, blue: 0.357)
-    static let appSurface = Color(red: 0.925, green: 0.992, blue: 0.957)
+    // Clarity purple palette — matches yin-yang logo
+    static let clarityGreen     = Color(red: 0.435, green: 0.235, blue: 0.792)
+    static let clarityGreenSoft = Color(red: 0.922, green: 0.898, blue: 0.984)
+    static let appNeutral  = Color(red: 0.322, green: 0.322, blue: 0.357)
+    static let appSurface  = Color(red: 0.958, green: 0.948, blue: 0.988)
     static let cardSurface = Color.white
 
-    static let brandVioletDark = clarityGreen
-    static let brandViolet = toneLayerBlue
-    static let brandGreen = clarityGreen
-    static let brandWhite = cardSurface
-    static let brandVioletMist = clarityGreenSoft
-    static let brandGreenMist = clarityGreenSoft
+    static let brandVioletDark  = clarityGreen
+    static let brandViolet      = toneLayerBlue
+    static let brandGreen       = clarityGreen
+    static let brandWhite       = cardSurface
+    static let brandVioletMist  = clarityGreenSoft
+    static let brandGreenMist   = clarityGreenSoft
 }
 
 struct GlassCard: ViewModifier {
@@ -66,18 +67,19 @@ struct ContentView: View {
     @State private var selectedResult = "Rewrite"
     @State private var showingOptions = false
     @State private var showTeaching = true
+    @State private var showTeachingForResult = false
     @State private var aiConsent = false
     @State private var exportURL: URL?
     @State private var activityItems: [Any] = []
     @State private var showingExportSheet = false
 
-    private let apiKeyKey = "ntClarityClaudeAPIKey"
+    private let apiKeyKey       = "ntClarityClaudeAPIKey"
     private let showTeachingKey = "ntClarityShowTeaching"
-    private let aiConsentKey = "toneLayerAIProcessingConsent"
-    private let appGroupID = "group.com.alden.ndclarity"
+    private let aiConsentKey    = "toneLayerAIProcessingConsent"
+    private let appGroupID      = "group.com.alden.ndclarity"
     private var sharedDefaults: UserDefaults? { UserDefaults(suiteName: appGroupID) }
-    private let lenses = ["General ND", "ADHD", "Autism", "PTSD / CPTSD", "Mixed"]
-    private let goals = ["Make clearer", "Reduce anxiety", "Make actionable"]
+    private let lenses    = ["General ND", "ADHD", "Autism", "PTSD / CPTSD", "Mixed"]
+    private let goals     = ["Make clearer", "Reduce anxiety", "Make actionable"]
     private let resultTabs = ["Original", "Rewrite", "Tone", "Why", "Tip"]
     private let dailyTips: [(title: String, body: String)] = [
         (
@@ -166,9 +168,9 @@ struct ContentView: View {
                 .foregroundStyle(.secondary)
 
             HStack(spacing: 10) {
-                statusPill(label: "Mode", value: "Clarity")
+                statusPill(label: "Mode",      value: "Clarity")
                 statusPill(label: "Direction", value: "NT \u{2192} ND")
-                statusPill(label: "Live AI", value: aiConsent && !apiKey.isEmpty ? "On" : "Local")
+                statusPill(label: "Live AI",   value: aiConsent && !apiKey.isEmpty ? "On" : "Local")
             }
         }
         .frame(maxWidth: .infinity)
@@ -287,7 +289,8 @@ struct ContentView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 13)
-                .background(isRewriting || draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.clarityGreen.opacity(0.45) : Color.clarityGreen)
+                .background(isRewriting || draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    ? Color.clarityGreen.opacity(0.45) : Color.clarityGreen)
                 .foregroundStyle(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
@@ -328,22 +331,20 @@ struct ContentView: View {
             .background(Color.clarityGreenSoft.opacity(0.95))
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
-            // Teaching card — shown prominently below the result whenever showTeaching is on
+            // Teaching card — always opens after every rewrite; X only dismisses for this result
             if hasOutput && showTeaching {
-                teachingCard
-            }
-
-            if !showTeaching && hasOutput {
-                Button {
-                    withAnimation { showTeaching = true }
-                    UserDefaults.standard.set(true, forKey: showTeachingKey)
-                    syncKeyboardSettings()
-                } label: {
-                    Label("Show teaching explanation", systemImage: "lightbulb")
-                        .font(.caption)
-                        .foregroundStyle(Color.clarityGreen)
+                if showTeachingForResult {
+                    teachingCard
+                } else {
+                    Button {
+                        withAnimation { showTeachingForResult = true }
+                    } label: {
+                        Label("Show teaching explanation", systemImage: "lightbulb")
+                            .font(.caption)
+                            .foregroundStyle(Color.clarityGreen)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
 
             if hasOutput {
@@ -377,39 +378,6 @@ struct ContentView: View {
                 }
             }
 
-            Text("Send to")
-                .font(.subheadline.weight(.semibold))
-
-            HStack(spacing: 10) {
-                Button { openEmail() } label: {
-                    Label("Email", systemImage: "envelope")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-
-                Button { openMessages() } label: {
-                    Label("Message", systemImage: "message")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-            }
-            .disabled(!hasOutput)
-
-            HStack(spacing: 10) {
-                Button { exportTextFile(label: "Word") } label: {
-                    Label("Word", systemImage: "doc.text")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-
-                Button { exportTextFile(label: "Pages") } label: {
-                    Label("Pages", systemImage: "doc.richtext")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-            }
-            .disabled(!hasOutput)
-
             Button { shareSelectedResult() } label: {
                 Label("Share", systemImage: "square.and.arrow.up")
                     .frame(maxWidth: .infinity)
@@ -431,9 +399,7 @@ struct ContentView: View {
                     .foregroundStyle(Color.clarityGreen)
                 Spacer()
                 Button {
-                    withAnimation { showTeaching = false }
-                    UserDefaults.standard.set(false, forKey: showTeachingKey)
-                    syncKeyboardSettings()
+                    withAnimation { showTeachingForResult = false }
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundStyle(Color.secondary.opacity(0.6))
@@ -486,9 +452,7 @@ struct ContentView: View {
                         ForEach(lenses, id: \.self) { Text($0).tag($0) }
                     }
                     .pickerStyle(.segmented)
-                    .onChange(of: audienceLens) { _, _ in
-                        syncKeyboardSettings()
-                    }
+                    .onChange(of: audienceLens) { _, _ in syncKeyboardSettings() }
                     Text("Default to General ND unless you know which lens is appropriate.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -508,7 +472,7 @@ struct ContentView: View {
                         .onChange(of: showTeaching) { _, newValue in
                             UserDefaults.standard.set(newValue, forKey: showTeachingKey)
                             syncKeyboardSettings()
-                            if !newValue { selectedResult = "Rewrite" }
+                            if !newValue { showTeachingForResult = false }
                         }
                 }
 
@@ -574,10 +538,10 @@ struct ContentView: View {
     private var selectedResultText: String {
         switch selectedResult {
         case "Original": return draft
-        case "Tone": return interpretationRisk
-        case "Why": return teachingWindowText
-        case "Tip": return learningTakeaway
-        default: return clearerVersion
+        case "Tone":     return interpretationRisk
+        case "Why":      return teachingWindowText
+        case "Tip":      return learningTakeaway
+        default:         return clearerVersion
         }
     }
 
@@ -589,12 +553,8 @@ struct ContentView: View {
     }
 
     private var teachingWindowText: String {
-        guard showTeaching else {
-            return "Teaching explanations are turned off in Options."
-        }
-        guard hasOutput else {
-            return "After a rewrite, this explains how the message may land and why the wording changed."
-        }
+        guard showTeaching else { return "Teaching explanations are turned off in Options." }
+        guard hasOutput else { return "After a rewrite, this explains how the message may land and why the wording changed." }
         var parts: [String] = []
         if !teachingExplanation.isEmpty { parts.append(teachingExplanation) }
         if !interpretationRisk.isEmpty  { parts.append("How this may sound:\n\(interpretationRisk)") }
@@ -619,9 +579,9 @@ struct ContentView: View {
     }
 
     private func syncKeyboardSettings() {
-        sharedDefaults?.set(apiKey, forKey: "claudeAPIKey")
+        sharedDefaults?.set(apiKey,       forKey: "claudeAPIKey")
         sharedDefaults?.set(showTeaching, forKey: "showExplanation")
-        sharedDefaults?.set("Clarity", forKey: "keyboardMode")
+        sharedDefaults?.set("Clarity",    forKey: "keyboardMode")
         sharedDefaults?.set(normalizedKeyboardProfile(audienceLens), forKey: "selectedProfile")
         sharedDefaults?.synchronize()
     }
@@ -645,6 +605,7 @@ struct ContentView: View {
         changeNotes = ""
         learningTakeaway = ""
         teachingExplanation = ""
+        showTeachingForResult = false
         status = ""
     }
 
@@ -682,6 +643,7 @@ struct ContentView: View {
         }
 
         isRewriting = true
+        showTeachingForResult = false
         incrementMetric("rewrite.requested")
         status = "Checking message..."
         selectedResult = "Rewrite"
@@ -690,13 +652,14 @@ struct ContentView: View {
             do {
                 let result = try await callClaude(text: input)
                 await MainActor.run {
-                    clearerVersion = result.clearerVersion
+                    clearerVersion     = result.clearerVersion
                     interpretationRisk = result.interpretationRisk
-                    changeNotes = result.changeNotes
-                    learningTakeaway = result.learningTakeaway
+                    changeNotes        = result.changeNotes
+                    learningTakeaway   = result.learningTakeaway
                     teachingExplanation = result.teachingExplanation
                     incrementMetric("rewrite.success")
                     isRewriting = false
+                    showTeachingForResult = showTeaching  // always open teaching after rewrite
                     status = "Ready"
                 }
             } catch {
@@ -720,14 +683,14 @@ struct ContentView: View {
     private func callClaude(text: String) async throws -> ClarityResult {
         var req = URLRequest(url: URL(string: "https://api.anthropic.com/v1/messages")!)
         req.httpMethod = "POST"
-        req.setValue(apiKey, forHTTPHeaderField: "x-api-key")
-        req.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
+        req.setValue(apiKey,             forHTTPHeaderField: "x-api-key")
+        req.setValue("2023-06-01",       forHTTPHeaderField: "anthropic-version")
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.timeoutInterval = 90
         req.httpBody = try JSONSerialization.data(withJSONObject: [
-            "model": "claude-haiku-4-5-20251001",
+            "model":    "claude-haiku-4-5-20251001",
             "max_tokens": 4096,
-            "system": buildSystemPrompt(),
+            "system":   buildSystemPrompt(),
             "messages": [["role": "user", "content": "Message:\n\(text)\n\nReply with ONLY valid JSON."]],
         ])
 
@@ -742,13 +705,13 @@ struct ContentView: View {
             throw ClarityError.apiFailed(http.statusCode)
         }
 
-        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+        guard let json    = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let content = (json["content"] as? [[String: Any]])?.first?["text"] as? String
         else { throw ClarityError.badResponse }
 
         let cleaned = extractJSON(from: content)
         guard let parsedData = cleaned.data(using: .utf8),
-              let parsed = try? JSONSerialization.jsonObject(with: parsedData) as? [String: Any]
+              let parsed     = try? JSONSerialization.jsonObject(with: parsedData) as? [String: Any]
         else {
             return ClarityResult(
                 clearerVersion: cleaned.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -757,10 +720,10 @@ struct ContentView: View {
         }
 
         return ClarityResult(
-            clearerVersion:    parsed["clearer_version"]     as? String ?? "",
-            interpretationRisk: parsed["interpretation_risk"] as? String ?? "",
-            changeNotes:       parsed["change_notes"]        as? String ?? "",
-            learningTakeaway:  parsed["learning_takeaway"]   as? String ?? "",
+            clearerVersion:     parsed["clearer_version"]      as? String ?? "",
+            interpretationRisk: parsed["interpretation_risk"]  as? String ?? "",
+            changeNotes:        parsed["change_notes"]         as? String ?? "",
+            learningTakeaway:   parsed["learning_takeaway"]    as? String ?? "",
             teachingExplanation: parsed["teaching_explanation"] as? String
                 ?? parsed["explanation"] as? String
                 ?? ""
@@ -807,36 +770,6 @@ struct ContentView: View {
         }
         return s
     }
-
-    private func openEmail() {
-        let encodedBody = clearerVersion.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        guard let url = URL(string: "mailto:?body=\(encodedBody)") else { return }
-        UIApplication.shared.open(url) { success in
-            if !success { UIPasteboard.general.string = clearerVersion; status = "Email unavailable. Copied instead." }
-        }
-    }
-
-    private func openMessages() {
-        let encodedBody = clearerVersion.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        guard let url = URL(string: "sms:&body=\(encodedBody)") else { return }
-        UIApplication.shared.open(url) { success in
-            if !success { UIPasteboard.general.string = clearerVersion; status = "Messages unavailable. Copied instead." }
-        }
-    }
-
-    private func exportTextFile(label: String) {
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("ND-Clarity-\(label).txt")
-        do {
-            try clearerVersion.write(to: url, atomically: true, encoding: .utf8)
-            exportURL = url
-            activityItems = [url]
-            showingExportSheet = true
-            status = "Choose \(label) from the share sheet"
-        } catch {
-            UIPasteboard.general.string = clearerVersion
-            status = "Export failed. Copied instead."
-        }
-    }
 }
 
 enum ClarityError: LocalizedError {
@@ -846,9 +779,9 @@ enum ClarityError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .apiFailed(let code): return "API failed (HTTP \(code))"
+        case .apiFailed(let code):    return "API failed (HTTP \(code))"
         case .apiMessage(let message): return message
-        case .badResponse: return "Unexpected API response"
+        case .badResponse:            return "Unexpected API response"
         }
     }
 }

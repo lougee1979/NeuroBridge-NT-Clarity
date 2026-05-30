@@ -47,24 +47,24 @@ struct KeyboardView: View {
     private let appGroupID = "group.com.alden.ndclarity"
     private var defaults: UserDefaults? { UserDefaults(suiteName: appGroupID) }
 
-    @State private var profile           = "Autism"
-    @State private var level             = "Medium"
-    @State private var isRewriting       = false
-    @State private var status            = ""
-    @State private var explanation       = ""
-    @State private var showExpl          = true
-    @State private var spiralEnabled     = true
-    @State private var isShifted         = false
-    @State private var isNumbers         = false
-    @State private var keyboardTypedText = ""
-    @State private var previewText       = ""
+    @State private var profile            = "Autism"
+    @State private var level              = "Medium"
+    @State private var isRewriting        = false
+    @State private var status             = ""
+    @State private var explanation        = ""
+    @State private var showExpl           = true
+    @State private var spiralEnabled      = true
+    @State private var isShifted          = false
+    @State private var isNumbers          = false
+    @State private var keyboardTypedText  = ""
+    @State private var previewText        = ""
     @State private var pendingDeleteCount = 0
 
     // Spiral state
-    @State private var showSpiral         = false
-    @State private var spiralNT           = ""
-    @State private var spiralGrammar      = ""
-    @State private var spiralOriginal     = ""
+    @State private var showSpiral          = false
+    @State private var spiralNT            = ""
+    @State private var spiralGrammar       = ""
+    @State private var spiralOriginal      = ""
     @State private var spiralOriginalCount = 0
 
     var body: some View {
@@ -90,7 +90,7 @@ struct KeyboardView: View {
 
     private var topBar: some View {
         HStack(spacing: 10) {
-            Image(systemName: "brain.head.profile")
+            Image(systemName: "yin.yang")
                 .foregroundStyle(Color.clarityAccent)
                 .font(.system(size: 15))
             VStack(alignment: .leading, spacing: 1) {
@@ -112,11 +112,19 @@ struct KeyboardView: View {
                     .lineLimit(1)
             }
             Spacer()
-            Button { inputVC.advanceToNextInputMode() } label: {
-                Image(systemName: "globe")
-                    .font(.system(size: 17))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 36, height: 36)
+            HStack(spacing: 2) {
+                Button { inputVC.advanceToNextInputMode() } label: {
+                    Image(systemName: "globe")
+                        .font(.system(size: 17))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 36, height: 36)
+                }
+                Button { inputVC.dismissKeyboard() } label: {
+                    Image(systemName: "keyboard.chevron.compact.down")
+                        .font(.system(size: 17))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 36, height: 36)
+                }
             }
         }
         .padding(.horizontal, 14)
@@ -413,11 +421,11 @@ struct KeyboardView: View {
     private func loadSettings() {
         let p = defaults?.string(forKey: "selectedProfile") ?? "Autism"
         switch p {
-        case "PTSD":         profile = "PTSD / CPTSD"
-        case "PTSD + ADHD":  profile = "ADHD + PTSD"
+        case "PTSD":          profile = "PTSD / CPTSD"
+        case "PTSD + ADHD":   profile = "ADHD + PTSD"
         case "PTSD + Autism": profile = "Autism + PTSD"
-        case "Mixed":        profile = "Mixed / Not Sure"
-        default:             profile = p
+        case "Mixed":         profile = "Mixed / Not Sure"
+        default:              profile = p
         }
         let stored = defaults?.string(forKey: "rewriteLevel") ?? "Medium"
         level = ["Light", "Medium", "Strong"].contains(stored) ? stored : "Medium"
@@ -441,9 +449,8 @@ struct KeyboardView: View {
         let before     = proxy.documentContextBeforeInput ?? ""
         let typedText  = keyboardTypedText.trimmingCharacters(in: .whitespacesAndNewlines)
         let cursorText = before.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Fall back to tracked typed text when proxy returns nothing (e.g. Mail)
         let shouldUseTypedText = !typedText.isEmpty && (cursorText.isEmpty || before.hasSuffix(keyboardTypedText))
-        let full         = shouldUseTypedText ? typedText  : cursorText
+        let full          = shouldUseTypedText ? typedText  : cursorText
         let totalToDelete = shouldUseTypedText ? keyboardTypedText.count : before.count
 
         guard !full.isEmpty else { showStatus("Type some text first"); return }
@@ -470,9 +477,9 @@ struct KeyboardView: View {
                     previewText = result.rewrite
 
                     if spiralEnabled && result.isSpiraling {
-                        spiralNT           = result.rewrite
-                        spiralGrammar      = result.grammarOnly
-                        spiralOriginal     = full
+                        spiralNT            = result.rewrite
+                        spiralGrammar       = result.grammarOnly
+                        spiralOriginal      = full
                         spiralOriginalCount = totalToDelete
                         withAnimation { showSpiral = true }
                     } else {
