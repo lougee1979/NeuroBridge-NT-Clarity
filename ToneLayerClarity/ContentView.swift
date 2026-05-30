@@ -11,13 +11,13 @@ import SwiftUI
 import UIKit
 
 extension Color {
-    static let toneLayerBlue     = Color(red: 0.145, green: 0.388, blue: 0.922)
-    static let toneLayerBlueSoft = Color(red: 0.859, green: 0.918, blue: 0.996)
-    // Clarity purple palette — matches yin-yang logo
-    static let clarityGreen     = Color(red: 0.435, green: 0.235, blue: 0.792)
-    static let clarityGreenSoft = Color(red: 0.922, green: 0.898, blue: 0.984)
+    static let toneLayerBlue     = Color(red: 0.376, green: 0.722, blue: 0.973)  // #60B8F8 sky blue
+    static let toneLayerBlueSoft = Color(red: 0.859, green: 0.941, blue: 0.996)  // #DBF0FF very light blue
+    // Clarity palette — matches soft butterfly logo
+    static let clarityGreen      = Color(red: 0.482, green: 0.333, blue: 0.847)  // #7B55D8 medium violet
+    static let clarityGreenSoft  = Color(red: 0.918, green: 0.898, blue: 0.980)  // #EAE5FA light lavender
     static let appNeutral  = Color(red: 0.322, green: 0.322, blue: 0.357)
-    static let appSurface  = Color(red: 0.958, green: 0.948, blue: 0.988)
+    static let appSurface  = Color(red: 0.945, green: 0.941, blue: 0.984)
     static let cardSurface = Color.white
 
     static let brandVioletDark  = clarityGreen
@@ -25,7 +25,7 @@ extension Color {
     static let brandGreen       = clarityGreen
     static let brandWhite       = cardSurface
     static let brandVioletMist  = clarityGreenSoft
-    static let brandGreenMist   = clarityGreenSoft
+    static let brandGreenMist   = toneLayerBlueSoft
 }
 
 struct GlassCard: ViewModifier {
@@ -169,7 +169,7 @@ struct ContentView: View {
 
             HStack(spacing: 10) {
                 statusPill(label: "Mode",      value: "Clarity")
-                statusPill(label: "Direction", value: "NT \u{2192} ND")
+                statusPill(label: "Direction", value: "NT → ND")
                 statusPill(label: "Live AI",   value: aiConsent && !apiKey.isEmpty ? "On" : "Local")
             }
         }
@@ -284,7 +284,7 @@ struct ContentView: View {
                     } else {
                         Image(systemName: "wand.and.stars")
                     }
-                    Text(isRewriting ? "Tuning\u{2026}" : "Rewrite")
+                    Text(isRewriting ? "Tuning…" : "Rewrite")
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
@@ -526,7 +526,7 @@ struct ContentView: View {
             .split { $0.isWhitespace || $0.isNewline }
             .count
         let chars = draft.count
-        return Text("\(chars) chars \u{2022} \(words) words")
+        return Text("\(chars) chars • \(words) words")
             .font(.caption)
             .foregroundStyle(.secondary)
     }
@@ -659,7 +659,7 @@ struct ContentView: View {
                     teachingExplanation = result.teachingExplanation
                     incrementMetric("rewrite.success")
                     isRewriting = false
-                    showTeachingForResult = showTeaching  // always open teaching after rewrite
+                    showTeachingForResult = showTeaching
                     status = "Ready"
                 }
             } catch {
@@ -742,17 +742,17 @@ struct ContentView: View {
 
         General ND: remove ambiguity, make the ask explicit, add necessary context, state urgency, and give a concrete next step.
         ADHD: reduce working-memory load, make priority and next action obvious, avoid buried asks and long multi-step wording.
-        Autism: make meaning literal, remove social subtext, state expectations directly, avoid vague phrases like "soon", "later", "we should talk", or "whatever works" unless defined.
+        Autism: make meaning literal, remove social subtext, state expectations directly, avoid vague phrases like \"soon\", \"later\", \"we should talk\", or \"whatever works\" unless defined.
         PTSD / CPTSD: reduce threat signals, add reassurance when appropriate, avoid vague warnings, criticism without context, or power-heavy phrasing.
         Mixed: assume overlapping ADHD, autistic, PTSD/CPTSD, and anxiety-related communication needs. Make the main point obvious first. Reduce working-memory load. Make implied meaning explicit. Remove vague timing or social hints. Lower threat signals and defensive wording. Include reassurance when appropriate. End with one clear next step.
 
         Always respond with ONLY valid JSON:
         {
-          "clearer_version": "the rewritten message the sender can use",
-          "teaching_explanation": "REQUIRED: plain-language explanation of how the original wording may land to the reader and why the rewrite improves clarity",
-          "interpretation_risk": "brief explanation of what the sender may sound like to an ND person and why it may be confusing, threatening, vague, or hard to act on",
-          "change_notes": "brief explanation of what changed and why",
-          "learning_takeaway": "one reusable rule the NT sender can remember next time, written plainly"
+          \"clearer_version\": \"the rewritten message the sender can use\",
+          \"teaching_explanation\": \"REQUIRED: plain-language explanation of how the original wording may land to the reader and why the rewrite improves clarity\",
+          \"interpretation_risk\": \"brief explanation of what the sender may sound like to an ND person and why it may be confusing, threatening, vague, or hard to act on\",
+          \"change_notes\": \"brief explanation of what changed and why\",
+          \"learning_takeaway\": \"one reusable rule the NT sender can remember next time, written plainly\"
         }
         """
     }
