@@ -11,20 +11,21 @@ import SwiftUI
 import UIKit
 
 extension Color {
-    static let toneLayerBlue = Color(red: 0.145, green: 0.388, blue: 0.922)
-    static let toneLayerBlueSoft = Color(red: 0.859, green: 0.918, blue: 0.996)
-    static let clarityGreen = Color(red: 0.020, green: 0.588, blue: 0.412)
-    static let clarityGreenSoft = Color(red: 0.820, green: 0.980, blue: 0.898)
-    static let appNeutral = Color(red: 0.322, green: 0.322, blue: 0.357)
-    static let appSurface = Color(red: 0.925, green: 0.992, blue: 0.957)
+    static let toneLayerBlue     = Color(red: 0.376, green: 0.722, blue: 0.973)  // #60B8F8 sky blue
+    static let toneLayerBlueSoft = Color(red: 0.859, green: 0.941, blue: 0.996)  // #DBF0FF very light blue
+    // Clarity palette — matches soft butterfly logo
+    static let clarityGreen      = Color(red: 0.482, green: 0.333, blue: 0.847)  // #7B55D8 medium violet
+    static let clarityGreenSoft  = Color(red: 0.918, green: 0.898, blue: 0.980)  // #EAE5FA light lavender
+    static let appNeutral  = Color(red: 0.322, green: 0.322, blue: 0.357)
+    static let appSurface  = Color(red: 0.945, green: 0.941, blue: 0.984)
     static let cardSurface = Color.white
 
-    static let brandVioletDark = clarityGreen
-    static let brandViolet = toneLayerBlue
-    static let brandGreen = clarityGreen
-    static let brandWhite = cardSurface
-    static let brandVioletMist = clarityGreenSoft
-    static let brandGreenMist = clarityGreenSoft
+    static let brandVioletDark  = clarityGreen
+    static let brandViolet      = toneLayerBlue
+    static let brandGreen       = clarityGreen
+    static let brandWhite       = cardSurface
+    static let brandVioletMist  = clarityGreenSoft
+    static let brandGreenMist   = toneLayerBlueSoft
 }
 
 struct GlassCard: ViewModifier {
@@ -63,22 +64,23 @@ struct ContentView: View {
     @State private var changeNotes = ""
     @State private var learningTakeaway = ""
     @State private var teachingExplanation = ""
-    @State private var selectedResult = "Fix"
+    @State private var selectedResult = "Rewrite"
     @State private var showingOptions = false
     @State private var showTeaching = true
+    @State private var showTeachingForResult = false
     @State private var aiConsent = false
     @State private var exportURL: URL?
     @State private var activityItems: [Any] = []
     @State private var showingExportSheet = false
 
-    private let apiKeyKey = "ntClarityClaudeAPIKey"
+    private let apiKeyKey       = "ntClarityClaudeAPIKey"
     private let showTeachingKey = "ntClarityShowTeaching"
-    private let aiConsentKey = "toneLayerAIProcessingConsent"
-    private let appGroupID = "group.com.alden.ndclarity"
+    private let aiConsentKey    = "toneLayerAIProcessingConsent"
+    private let appGroupID      = "group.com.alden.ndclarity"
     private var sharedDefaults: UserDefaults? { UserDefaults(suiteName: appGroupID) }
-    private let lenses = ["General ND", "ADHD", "Autism", "PTSD / CPTSD", "Mixed"]
-    private let goals = ["Make clearer", "Reduce anxiety", "Make actionable"]
-    private let resultTabs = ["Fix", "Tone", "Why", "Tip"]
+    private let lenses    = ["General ND", "ADHD", "Autism", "PTSD / CPTSD", "Mixed"]
+    private let goals     = ["Make clearer", "Reduce anxiety", "Make actionable"]
+    private let resultTabs = ["Original", "Rewrite", "Tone", "Why", "Tip"]
     private let dailyTips: [(title: String, body: String)] = [
         (
             "A blocked call may not feel neutral",
@@ -166,9 +168,9 @@ struct ContentView: View {
                 .foregroundStyle(.secondary)
 
             HStack(spacing: 10) {
-                statusPill(label: "Mode", value: "Clarity")
-                statusPill(label: "Direction", value: "NT -> ND")
-                statusPill(label: "Live AI", value: aiConsent && !apiKey.isEmpty ? "On" : "Local")
+                statusPill(label: "Mode",      value: "Clarity")
+                statusPill(label: "Direction", value: "NT → ND")
+                statusPill(label: "Live AI",   value: aiConsent && !apiKey.isEmpty ? "On" : "Local")
             }
         }
         .frame(maxWidth: .infinity)
@@ -177,17 +179,19 @@ struct ContentView: View {
     }
 
     private func statusPill(label: String, value: String) -> some View {
-        HStack {
+        VStack(spacing: 2) {
             Text(label)
-                .font(.caption)
+                .font(.caption2)
                 .foregroundStyle(.secondary)
-            Spacer()
+                .lineLimit(1)
             Text(value)
                 .font(.caption.weight(.bold))
                 .foregroundStyle(Color.clarityGreen)
+                .lineLimit(1)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
         .background(Color.clarityGreenSoft)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
@@ -280,12 +284,13 @@ struct ContentView: View {
                     } else {
                         Image(systemName: "wand.and.stars")
                     }
-                    Text(isRewriting ? "Tuning…" : "Clarify")
+                    Text(isRewriting ? "Tuning…" : "Rewrite")
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 13)
-                .background(isRewriting || draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.clarityGreen.opacity(0.45) : Color.clarityGreen)
+                .background(isRewriting || draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    ? Color.clarityGreen.opacity(0.45) : Color.clarityGreen)
                 .foregroundStyle(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
@@ -297,35 +302,50 @@ struct ContentView: View {
                     .foregroundStyle(.secondary)
             }
 
-            if showTeaching {
-                Picker("Result", selection: $selectedResult) {
-                    ForEach(resultTabs, id: \.self) { Text($0).font(.caption).lineLimit(1).minimumScaleFactor(0.85).tag($0) }
+            HStack(spacing: 6) {
+                ForEach(resultTabs, id: \.self) { tab in
+                    Button { selectedResult = tab } label: {
+                        Text(tab)
+                            .font(.caption.weight(selectedResult == tab ? .bold : .semibold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(selectedResult == tab ? Color.clarityGreen : Color(.tertiarySystemBackground))
+                            .foregroundStyle(selectedResult == tab ? Color.white : Color.primary)
+                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
                 }
-                .pickerStyle(.segmented)
             }
 
-            Text(resultWindowText)
-                .font(.body)
-                        .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
-                .frame(maxWidth: .infinity, minHeight: 120, alignment: .topLeading)
-                .padding(14)
-                        .background(Color.clarityGreenSoft.opacity(0.95))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                .textSelection(.enabled)
-
-            VStack(alignment: .leading, spacing: 8) {
-                Label("Why", systemImage: "lightbulb")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.clarityGreen)
-                Text(teachingWindowText)
-                    .font(.subheadline)
-                        .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
+            ScrollView {
+                Text(resultWindowText)
+                    .font(.body)
+                    .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .padding(14)
                     .textSelection(.enabled)
             }
-            .frame(maxWidth: .infinity, minHeight: 90, alignment: .topLeading)
-            .padding(14)
-            .background(Color.brandGreenMist)
+            .frame(minHeight: 220, maxHeight: 400)
+            .background(Color.clarityGreenSoft.opacity(0.95))
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+            // Teaching card — always opens after every rewrite; X only dismisses for this result
+            if hasOutput && showTeaching {
+                if showTeachingForResult {
+                    teachingCard
+                } else {
+                    Button {
+                        withAnimation { showTeachingForResult = true }
+                    } label: {
+                        Label("Show teaching explanation", systemImage: "lightbulb")
+                            .font(.caption)
+                            .foregroundStyle(Color.clarityGreen)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
 
             if hasOutput {
                 HStack(spacing: 10) {
@@ -358,39 +378,6 @@ struct ContentView: View {
                 }
             }
 
-            Text("Send to")
-                .font(.subheadline.weight(.semibold))
-
-            HStack(spacing: 10) {
-                Button { openEmail() } label: {
-                    Label("Email", systemImage: "envelope")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-
-                Button { openMessages() } label: {
-                    Label("Message", systemImage: "message")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-            }
-            .disabled(!hasOutput)
-
-            HStack(spacing: 10) {
-                Button { exportTextFile(label: "Word") } label: {
-                    Label("Word", systemImage: "doc.text")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-
-                Button { exportTextFile(label: "Pages") } label: {
-                    Label("Pages", systemImage: "doc.richtext")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-            }
-            .disabled(!hasOutput)
-
             Button { shareSelectedResult() } label: {
                 Label("Share", systemImage: "square.and.arrow.up")
                     .frame(maxWidth: .infinity)
@@ -404,6 +391,57 @@ struct ContentView: View {
         .glassCard(tint: .clarityGreen, cornerRadius: 18)
     }
 
+    private var teachingCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label("How this lands", systemImage: "lightbulb.fill")
+                    .font(.headline)
+                    .foregroundStyle(Color.clarityGreen)
+                Spacer()
+                Button {
+                    withAnimation { showTeachingForResult = false }
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(Color.secondary.opacity(0.6))
+                        .font(.body)
+                }
+                .buttonStyle(.plain)
+            }
+
+            if !teachingExplanation.isEmpty {
+                Text(teachingExplanation)
+                    .font(.body)
+                    .foregroundStyle(Color.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if !learningTakeaway.isEmpty {
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "arrow.right.circle.fill")
+                        .foregroundStyle(Color.clarityGreen)
+                        .font(.subheadline)
+                        .padding(.top, 2)
+                    Text(learningTakeaway)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.clarityGreenSoft)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(Color.clarityGreenSoft.opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(Color.clarityGreen.opacity(0.25), lineWidth: 1)
+        )
+    }
+
     private var optionsCard: some View {
         DisclosureGroup(isExpanded: $showingOptions) {
             VStack(alignment: .leading, spacing: 18) {
@@ -414,9 +452,7 @@ struct ContentView: View {
                         ForEach(lenses, id: \.self) { Text($0).tag($0) }
                     }
                     .pickerStyle(.segmented)
-                    .onChange(of: audienceLens) { _, _ in
-                        syncKeyboardSettings()
-                    }
+                    .onChange(of: audienceLens) { _, _ in syncKeyboardSettings() }
                     Text("Default to General ND unless you know which lens is appropriate.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -436,7 +472,7 @@ struct ContentView: View {
                         .onChange(of: showTeaching) { _, newValue in
                             UserDefaults.standard.set(newValue, forKey: showTeachingKey)
                             syncKeyboardSettings()
-                            if !newValue { selectedResult = "Fix" }
+                            if !newValue { showTeachingForResult = false }
                         }
                 }
 
@@ -485,27 +521,14 @@ struct ContentView: View {
         .glassCard(tint: .appNeutral, cornerRadius: 18)
     }
 
-
     private var messageLengthNotice: some View {
         let words = draft.trimmingCharacters(in: .whitespacesAndNewlines)
             .split { $0.isWhitespace || $0.isNewline }
             .count
         let chars = draft.count
-        let isLong = chars >= 700 || words >= 120
-        return VStack(alignment: .leading, spacing: 6) {
-            Text("\(chars) chars • \(words) words")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            if isLong {
-                Text("This is getting long for a text. Are you okay? If this is turning into a novel, try Clarify or Make Brief before sending.")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color(red: 0.42, green: 0.24, blue: 0.02))
-                    .padding(10)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.yellow.opacity(0.18))
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            }
-        }
+        return Text("\(chars) chars • \(words) words")
+            .font(.caption)
+            .foregroundStyle(.secondary)
     }
 
     private var hasOutput: Bool {
@@ -514,44 +537,30 @@ struct ContentView: View {
 
     private var selectedResultText: String {
         switch selectedResult {
-        case "Tone": return interpretationRisk
-        case "Why": return changeNotes
-        case "Tip": return learningTakeaway
-        default: return clearerVersion
+        case "Original": return draft
+        case "Tone":     return interpretationRisk
+        case "Why":      return teachingWindowText
+        case "Tip":      return learningTakeaway
+        default:         return clearerVersion
         }
     }
 
     private var resultWindowText: String {
-        guard hasOutput else {
-            return "Your clearer version will appear here."
-        }
-        return selectedResultText.isEmpty ? "Your clearer version will appear here." : selectedResultText
+        if selectedResult == "Original" { return draft.isEmpty ? "Your original message will show here." : draft }
+        guard hasOutput else { return "Tap Rewrite to see the rewritten version here." }
+        let text = selectedResultText
+        return text.isEmpty ? "Nothing to show for this tab yet." : text
     }
 
     private var teachingWindowText: String {
-        guard showTeaching else {
-            return "Teaching explanations are turned off in Options."
-        }
-        guard hasOutput else {
-            return "After a rewrite, this explains how the message may land and why the wording changed."
-        }
+        guard showTeaching else { return "Teaching explanations are turned off in Options." }
+        guard hasOutput else { return "After a rewrite, this explains how the message may land and why the wording changed." }
         var parts: [String] = []
-        if !teachingExplanation.isEmpty {
-            parts.append(teachingExplanation)
-        }
-        if !interpretationRisk.isEmpty {
-            parts.append("How this may sound:\n\(interpretationRisk)")
-        }
-        if !changeNotes.isEmpty {
-            parts.append("What changed:\n\(changeNotes)")
-        }
-        if !learningTakeaway.isEmpty {
-            parts.append("Learn:\n\(learningTakeaway)")
-        }
-        if !parts.isEmpty {
-            return parts.joined(separator: "\n\n")
-        }
-        return "No teaching note returned for this rewrite."
+        if !teachingExplanation.isEmpty { parts.append(teachingExplanation) }
+        if !interpretationRisk.isEmpty  { parts.append("How this may sound:\n\(interpretationRisk)") }
+        if !changeNotes.isEmpty         { parts.append("What changed:\n\(changeNotes)") }
+        if !learningTakeaway.isEmpty    { parts.append("Learn:\n\(learningTakeaway)") }
+        return parts.isEmpty ? "No teaching note returned for this rewrite." : parts.joined(separator: "\n\n")
     }
 
     private func pasteFromClipboard() {
@@ -570,19 +579,17 @@ struct ContentView: View {
     }
 
     private func syncKeyboardSettings() {
-        sharedDefaults?.set(apiKey, forKey: "claudeAPIKey")
+        sharedDefaults?.set(apiKey,       forKey: "claudeAPIKey")
         sharedDefaults?.set(showTeaching, forKey: "showExplanation")
-        sharedDefaults?.set("Clarity", forKey: "keyboardMode")
+        sharedDefaults?.set("Clarity",    forKey: "keyboardMode")
         sharedDefaults?.set(normalizedKeyboardProfile(audienceLens), forKey: "selectedProfile")
         sharedDefaults?.synchronize()
     }
 
     private func normalizedKeyboardProfile(_ lens: String) -> String {
         switch lens {
-        case "General ND", "Mixed":
-            return "Mixed / Not Sure"
-        default:
-            return lens
+        case "General ND", "Mixed": return "Mixed / Not Sure"
+        default: return lens
         }
     }
 
@@ -598,6 +605,7 @@ struct ContentView: View {
         changeNotes = ""
         learningTakeaway = ""
         teachingExplanation = ""
+        showTeachingForResult = false
         status = ""
     }
 
@@ -635,24 +643,23 @@ struct ContentView: View {
         }
 
         isRewriting = true
+        showTeachingForResult = false
         incrementMetric("rewrite.requested")
-        if input.count >= 700 || input.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count >= 120 {
-            incrementMetric("longMessage.flagged")
-        }
         status = "Checking message..."
-        selectedResult = "Fix"
+        selectedResult = "Rewrite"
 
         Task {
             do {
                 let result = try await callClaude(text: input)
                 await MainActor.run {
-                    clearerVersion = result.clearerVersion
+                    clearerVersion     = result.clearerVersion
                     interpretationRisk = result.interpretationRisk
-                    changeNotes = result.changeNotes
-                    learningTakeaway = result.learningTakeaway
+                    changeNotes        = result.changeNotes
+                    learningTakeaway   = result.learningTakeaway
                     teachingExplanation = result.teachingExplanation
                     incrementMetric("rewrite.success")
                     isRewriting = false
+                    showTeachingForResult = showTeaching
                     status = "Ready"
                 }
             } catch {
@@ -676,14 +683,14 @@ struct ContentView: View {
     private func callClaude(text: String) async throws -> ClarityResult {
         var req = URLRequest(url: URL(string: "https://api.anthropic.com/v1/messages")!)
         req.httpMethod = "POST"
-        req.setValue(apiKey, forHTTPHeaderField: "x-api-key")
-        req.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
+        req.setValue(apiKey,             forHTTPHeaderField: "x-api-key")
+        req.setValue("2023-06-01",       forHTTPHeaderField: "anthropic-version")
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.timeoutInterval = 90
         req.httpBody = try JSONSerialization.data(withJSONObject: [
-            "model": "claude-haiku-4-5-20251001",
+            "model":    "claude-haiku-4-5-20251001",
             "max_tokens": 4096,
-            "system": buildSystemPrompt(),
+            "system":   buildSystemPrompt(),
             "messages": [["role": "user", "content": "Message:\n\(text)\n\nReply with ONLY valid JSON."]],
         ])
 
@@ -698,28 +705,25 @@ struct ContentView: View {
             throw ClarityError.apiFailed(http.statusCode)
         }
 
-        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+        guard let json    = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let content = (json["content"] as? [[String: Any]])?.first?["text"] as? String
         else { throw ClarityError.badResponse }
 
         let cleaned = extractJSON(from: content)
         guard let parsedData = cleaned.data(using: .utf8),
-              let parsed = try? JSONSerialization.jsonObject(with: parsedData) as? [String: Any]
+              let parsed     = try? JSONSerialization.jsonObject(with: parsedData) as? [String: Any]
         else {
             return ClarityResult(
                 clearerVersion: cleaned.trimmingCharacters(in: .whitespacesAndNewlines),
-                interpretationRisk: "",
-                changeNotes: "",
-                learningTakeaway: "",
-                teachingExplanation: ""
+                interpretationRisk: "", changeNotes: "", learningTakeaway: "", teachingExplanation: ""
             )
         }
 
         return ClarityResult(
-            clearerVersion: parsed["clearer_version"] as? String ?? "",
-            interpretationRisk: parsed["interpretation_risk"] as? String ?? "",
-            changeNotes: parsed["change_notes"] as? String ?? "",
-            learningTakeaway: parsed["learning_takeaway"] as? String ?? "",
+            clearerVersion:     parsed["clearer_version"]      as? String ?? "",
+            interpretationRisk: parsed["interpretation_risk"]  as? String ?? "",
+            changeNotes:        parsed["change_notes"]         as? String ?? "",
+            learningTakeaway:   parsed["learning_takeaway"]    as? String ?? "",
             teachingExplanation: parsed["teaching_explanation"] as? String
                 ?? parsed["explanation"] as? String
                 ?? ""
@@ -738,17 +742,17 @@ struct ContentView: View {
 
         General ND: remove ambiguity, make the ask explicit, add necessary context, state urgency, and give a concrete next step.
         ADHD: reduce working-memory load, make priority and next action obvious, avoid buried asks and long multi-step wording.
-        Autism: make meaning literal, remove social subtext, state expectations directly, avoid vague phrases like "soon", "later", "we should talk", or "whatever works" unless defined.
+        Autism: make meaning literal, remove social subtext, state expectations directly, avoid vague phrases like \"soon\", \"later\", \"we should talk\", or \"whatever works\" unless defined.
         PTSD / CPTSD: reduce threat signals, add reassurance when appropriate, avoid vague warnings, criticism without context, or power-heavy phrasing.
         Mixed: assume overlapping ADHD, autistic, PTSD/CPTSD, and anxiety-related communication needs. Make the main point obvious first. Reduce working-memory load. Make implied meaning explicit. Remove vague timing or social hints. Lower threat signals and defensive wording. Include reassurance when appropriate. End with one clear next step.
 
         Always respond with ONLY valid JSON:
         {
-          "clearer_version": "the rewritten message the sender can use",
-          "teaching_explanation": "REQUIRED: plain-language explanation of how the original wording may land to the reader and why the rewrite improves clarity",
-          "interpretation_risk": "brief explanation of what the sender may sound like to an ND person and why it may be confusing, threatening, vague, or hard to act on",
-          "change_notes": "brief explanation of what changed and why",
-          "learning_takeaway": "one reusable rule the NT sender can remember next time, written plainly"
+          \"clearer_version\": \"the rewritten message the sender can use\",
+          \"teaching_explanation\": \"REQUIRED: plain-language explanation of how the original wording may land to the reader and why the rewrite improves clarity\",
+          \"interpretation_risk\": \"brief explanation of what the sender may sound like to an ND person and why it may be confusing, threatening, vague, or hard to act on\",
+          \"change_notes\": \"brief explanation of what changed and why\",
+          \"learning_takeaway\": \"one reusable rule the NT sender can remember next time, written plainly\"
         }
         """
     }
@@ -756,12 +760,8 @@ struct ContentView: View {
     private func extractJSON(from raw: String) -> String {
         var s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         if s.hasPrefix("```") {
-            if let firstNL = s.firstIndex(of: "\n") {
-                s = String(s[s.index(after: firstNL)...])
-            }
-            if s.hasSuffix("```") {
-                s = String(s.dropLast(3)).trimmingCharacters(in: .whitespacesAndNewlines)
-            }
+            if let firstNL = s.firstIndex(of: "\n") { s = String(s[s.index(after: firstNL)...]) }
+            if s.hasSuffix("```") { s = String(s.dropLast(3)).trimmingCharacters(in: .whitespacesAndNewlines) }
         }
         if let openIdx = s.firstIndex(of: "{"),
            let closeIdx = s.lastIndex(of: "}"),
@@ -769,43 +769,6 @@ struct ContentView: View {
             return String(s[openIdx...closeIdx])
         }
         return s
-    }
-
-    private func openEmail() {
-        let encodedBody = clearerVersion.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        guard let url = URL(string: "mailto:?body=\(encodedBody)") else { return }
-        UIApplication.shared.open(url) { success in
-            if !success {
-                UIPasteboard.general.string = clearerVersion
-                status = "Email unavailable. Copied instead."
-            }
-        }
-    }
-
-    private func openMessages() {
-        let encodedBody = clearerVersion.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        guard let url = URL(string: "sms:&body=\(encodedBody)") else { return }
-        UIApplication.shared.open(url) { success in
-            if !success {
-                UIPasteboard.general.string = clearerVersion
-                status = "Messages unavailable. Copied instead."
-            }
-        }
-    }
-
-    private func exportTextFile(label: String) {
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("ND-Clarity-\(label).txt")
-        do {
-            try clearerVersion.write(to: url, atomically: true, encoding: .utf8)
-            exportURL = url
-            activityItems = [url]
-            showingExportSheet = true
-            status = "Choose \(label) from the share sheet"
-        } catch {
-            UIPasteboard.general.string = clearerVersion
-            status = "Export failed. Copied instead."
-        }
     }
 }
 
@@ -816,20 +779,18 @@ enum ClarityError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .apiFailed(let code): return "API failed (HTTP \(code))"
+        case .apiFailed(let code):    return "API failed (HTTP \(code))"
         case .apiMessage(let message): return message
-        case .badResponse: return "Unexpected API response"
+        case .badResponse:            return "Unexpected API response"
         }
     }
 }
 
 struct ActivityView: UIViewControllerRepresentable {
     let activityItems: [Any]
-
     func makeUIViewController(context: Context) -> UIActivityViewController {
         UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
     }
-
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
@@ -851,9 +812,7 @@ struct UIKitTextView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UITextView, context: Context) {
-        if uiView.text != text {
-            uiView.text = text
-        }
+        if uiView.text != text { uiView.text = text }
     }
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
@@ -861,10 +820,7 @@ struct UIKitTextView: UIViewRepresentable {
     class Coordinator: NSObject, UITextViewDelegate {
         var parent: UIKitTextView
         init(_ parent: UIKitTextView) { self.parent = parent }
-
-        func textViewDidChange(_ textView: UITextView) {
-            parent.text = textView.text
-        }
+        func textViewDidChange(_ textView: UITextView) { parent.text = textView.text }
     }
 }
 
