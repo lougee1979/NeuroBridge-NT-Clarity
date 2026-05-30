@@ -10,9 +10,9 @@ import SwiftUI
 extension Color {
     static let clarityAccent     = Color(red: 0.435, green: 0.310, blue: 0.745)
     static let clarityBackground = Color(red: 0.89,  green: 0.85,  blue: 0.99)
-    static let claritySpecialKey = Color(red: 0.812, green: 0.765, blue: 0.941)
+    static let claritySpecialKey = Color(UIColor.systemGray4)
     static let keyboardKey       = Color.white
-    static let keyboardText      = Color(red: 0.055, green: 0.065, blue: 0.080)
+    static let keyboardText      = Color(red: 0.08, green: 0.10, blue: 0.12)
 }
 
 // MARK: - Principal class
@@ -76,11 +76,8 @@ struct KeyboardView: View {
         .frame(maxWidth: .infinity)
         .clipped()
         .background(
-            LinearGradient(
-                colors: [Color.clarityAccent.opacity(0.13), Color.clarityBackground],
-                startPoint: .top,
-                endPoint: .bottom
-            )
+            Color(UIColor.systemGroupedBackground)
+                .overlay(Color.clarityAccent.opacity(0.06))
         )
         .preferredColorScheme(.light)
         .onAppear { loadSettings() }
@@ -146,7 +143,7 @@ struct KeyboardView: View {
                             .font(.system(size: 14, weight: level == l ? .bold : .semibold))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 8)
-                            .background(level == l ? Color.clarityAccent : Color.claritySpecialKey.opacity(0.78))
+                            .background(level == l ? Color.clarityAccent : Color.claritySpecialKey)
                             .foregroundStyle(level == l ? Color.white : Color.keyboardText)
                             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     }
@@ -197,7 +194,7 @@ struct KeyboardView: View {
                     .foregroundStyle(Color.clarityAccent)
                 Text("Clarity preview")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
+                    .foregroundStyle(Color.keyboardText)
                 Spacer()
                 if !previewText.isEmpty {
                     Button {
@@ -216,7 +213,7 @@ struct KeyboardView: View {
             if !previewText.isEmpty {
                 Text(previewText)
                     .font(.system(size: 11))
-                    .foregroundStyle(Color(red: 0.12, green: 0.15, blue: 0.18))
+                    .foregroundStyle(Color.keyboardText)
                     .lineLimit(4)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -269,7 +266,7 @@ struct KeyboardView: View {
         }
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.82))
+        .background(Color.white.opacity(0.85))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -280,11 +277,11 @@ struct KeyboardView: View {
     // MARK: - Keyboard
 
     private var qwertyKeyboard: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 6) {
             if isNumbers {
                 keyRow(["1","2","3","4","5","6","7","8","9","0"])
                 keyRow(["-","/",":",";","(",")","$","&","@","\""])
-                HStack(spacing: 4) {
+                HStack(spacing: 5) {
                     specialKey("ABC", width: 52) { isNumbers = false }
                     keyRow([".",",","?","!","'"], flexible: true)
                     specialKey("\u{232b}", width: 52) {
@@ -295,18 +292,18 @@ struct KeyboardView: View {
             } else {
                 keyRow(["q","w","e","r","t","y","u","i","o","p"])
                 keyRow(["a","s","d","f","g","h","j","k","l"]).padding(.horizontal, 18)
-                HStack(spacing: 4) {
-                    specialKey(isShifted ? "\u{21e7}" : "\u{21e7}", width: 42, highlighted: isShifted) { isShifted.toggle() }
+                HStack(spacing: 5) {
+                    specialKey(isShifted ? "\u{21e7}" : "\u{21e7}", width: 44, highlighted: isShifted) { isShifted.toggle() }
                     keyRow(["z","x","c","v","b","n","m"], flexible: true)
-                    specialKey("\u{232b}", width: 42) {
+                    specialKey("\u{232b}", width: 44) {
                         inputVC.textDocumentProxy.deleteBackward()
                         if !keyboardTypedText.isEmpty { keyboardTypedText.removeLast() }
                     }
                 }
             }
-            HStack(spacing: 4) {
-                specialKey(isNumbers ? "ABC" : "123", width: 48) { isNumbers.toggle() }
-                specialKey("\u{1f310}", width: 42) { inputVC.advanceToNextInputMode() }
+            HStack(spacing: 5) {
+                specialKey(isNumbers ? "ABC" : "123", width: 50) { isNumbers.toggle() }
+                specialKey("\u{1f310}", width: 44) { inputVC.advanceToNextInputMode() }
                 Button {
                     inputVC.textDocumentProxy.insertText(" ")
                     keyboardTypedText += " "
@@ -314,13 +311,14 @@ struct KeyboardView: View {
                     Text("space")
                         .font(.system(size: 16))
                         .frame(maxWidth: .infinity)
-                        .frame(height: 42)
+                        .frame(height: 44)
                         .background(Color.keyboardKey)
                         .foregroundStyle(Color.keyboardText)
-                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+                        .shadow(color: Color.black.opacity(0.30), radius: 0, x: 0, y: 1)
                 }
                 .buttonStyle(.plain)
-                specialKey("return", width: 70) {
+                specialKey("return", width: 72) {
                     inputVC.textDocumentProxy.insertText("\n")
                     keyboardTypedText += "\n"
                 }
@@ -329,7 +327,7 @@ struct KeyboardView: View {
     }
 
     private func keyRow(_ keys: [String], flexible: Bool = false) -> some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 5) {
             ForEach(keys, id: \.self) { key in
                 letterKey(key).if(flexible) { $0.frame(maxWidth: .infinity) }
             }
@@ -344,13 +342,13 @@ struct KeyboardView: View {
             if isShifted { isShifted = false }
         } label: {
             Text(isShifted ? key.uppercased() : key)
-                .font(.system(size: 21))
+                .font(.system(size: 22))
                 .frame(maxWidth: .infinity)
-                .frame(height: 42)
+                .frame(height: 44)
                 .background(Color.keyboardKey)
                 .foregroundStyle(Color.keyboardText)
-                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                .shadow(color: Color.black.opacity(0.22), radius: 0, x: 0, y: 1)
+                .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+                .shadow(color: Color.black.opacity(0.30), radius: 0, x: 0, y: 1)
         }
         .buttonStyle(.plain)
     }
@@ -361,10 +359,11 @@ struct KeyboardView: View {
                 .font(.system(size: 15, weight: .medium))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-                .frame(width: width, height: 42)
-                .background(highlighted ? Color.keyboardKey : Color.claritySpecialKey)
-                .foregroundStyle(Color.keyboardText)
-                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .frame(width: width, height: 44)
+                .background(highlighted ? Color.clarityAccent : Color.claritySpecialKey)
+                .foregroundStyle(highlighted ? Color.white : Color.keyboardText)
+                .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+                .shadow(color: Color.black.opacity(0.22), radius: 0, x: 0, y: 1)
         }
         .buttonStyle(.plain)
     }
@@ -400,8 +399,8 @@ struct KeyboardView: View {
                 .font(.system(size: 11, weight: .semibold))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .background(primary ? Color.clarityAccent : Color(.systemGray4))
-                .foregroundStyle(primary ? Color.white : Color(red: 0.12, green: 0.15, blue: 0.18))
+                .background(primary ? Color.clarityAccent : Color.claritySpecialKey)
+                .foregroundStyle(primary ? Color.white : Color.keyboardText)
                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
         .buttonStyle(.plain)
@@ -662,15 +661,13 @@ struct KeyboardView: View {
 
         The "paragraphs" array is the primary output. For any text longer than 3 sentences, you MUST return at least 2 paragraphs \u{2014} never collapse everything into a single string. Multi-topic messages must always be broken into multiple paragraphs.
 
-        The explanation must teach how the original wording may land to an ND reader and why the rewrite is easier to understand.
-
         Always respond with ONLY valid JSON \u{2014} no markdown, no code fences, no extra text.
 
         {
           "paragraphs": ["first paragraph as a plain string", "second paragraph as a plain string if needed"],
           "explanation": "REQUIRED: one sentence explaining what hidden assumption, vague wording, threat signal, or missing next step you addressed and why the rewrite is easier for ND readers.",
           "distortions": [],
-          "grammar_only": "grammar-fixed version of the full original that preserves the sender's structure and meaning but fixes grammar, spelling, and punctuation."
+          "grammar_only": "grammar-fixed version of the full original."
         }
         """
     }
